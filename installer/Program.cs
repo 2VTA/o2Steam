@@ -15,6 +15,15 @@ if (selfTest >= 0 && selfTest + 1 < args.Length)
     return await form.SelfTest(args[selfTest + 1]);
 }
 
+// --install <steam folder> / --uninstall <steam folder>: the same install or removal without windows
+// (Steam must already be closed). Handy for scripted tests.
+foreach (var mode in new[] { "--install", "--uninstall" })
+{
+    var at = Array.IndexOf(args, mode);
+    if (at >= 0 && at + 1 < args.Length)
+        return await new InstallerForm().RunSilent(args[at + 1], mode == "--install");
+}
+
 Application.Run(new InstallerForm());
 return 0;
 
@@ -201,6 +210,19 @@ sealed class InstallerForm : Form
     }
 
     // ---------------------------------------------------------------- install / uninstall
+
+    public async Task<int> RunSilent(string folder, bool install)
+    {
+        silent = true;
+        steamPath.Text = folder;
+        try
+        {
+            if (SteamRunning()) throw new InvalidOperationException("Steam is running - close it first.");
+            if (install) await Install(); else await Uninstall();
+            return 0;
+        }
+        catch (Exception e) { Console.WriteLine("FAILED: " + e.Message); return 1; }
+    }
 
     public async Task<int> SelfTest(string folder)
     {

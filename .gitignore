@@ -39,6 +39,7 @@ __cmake_systeminformation/
 target/
 starlight/npm/bin/millennium/types/
 starlight/npm/binaries/
+
 installer/out/
 installer/obj/
 installer/bin/

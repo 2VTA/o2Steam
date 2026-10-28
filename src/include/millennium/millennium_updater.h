@@ -53,7 +53,7 @@ class millennium_updater
     void set_ipc_main(std::shared_ptr<ipc_main> ipc_main);
 
   private:
-    static constexpr const char* GITHUB_API_URL = "https://api.github.com/repos/2VTA/o2steam/releases";
+    static constexpr const char* GITHUB_API_URL = "https://api.github.com/repos/2VTA/o2Steam/releases";
 
     std::string parse_version(const std::string& version);
     void update_impl(const std::string& downloadUrl, const size_t downloadSize);

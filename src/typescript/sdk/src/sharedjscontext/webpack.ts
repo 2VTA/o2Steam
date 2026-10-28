@@ -62,11 +62,12 @@ function resolveModule(m: Module): Module {
 	return resolved;
 }
 
+let webpackRequire!: ((id: any) => Module) & { m: object };
+
 function initModuleCache() {
 	// Webpack 5, currently on beta
 	// Generate a fake module ID
 	const id = Symbol('@steambrew/client');
-	let webpackRequire!: ((id: any) => Module) & { m: object };
 	// Insert our module in a new chunk.
 	// The module will then be called with webpack's internal require function as its first argument
 	window.webpackChunksteamui.push([
@@ -91,6 +92,27 @@ function initModuleCache() {
 }
 
 initModuleCache();
+
+/**
+ * Steam loads parts of its UI in later chunks, so modules that did not exist when the cache was first built
+ * (the router, for one) show up afterwards. Adds any module that is not in the cache yet; returns how many.
+ */
+export function refreshModuleCache(): number {
+	let added = 0;
+	for (let id of Object.keys(webpackRequire.m)) {
+		if (modules.has(id)) continue;
+		try {
+			const module = webpackRequire(id);
+			if (module) {
+				modules.set(id, module);
+				added++;
+			}
+		} catch (e) {
+			logger.debug('Ignoring require error for module', id, e);
+		}
+	}
+	return added;
+}
 
 export const findModule = (filter: FilterFn) => {
 	for (const m of modules.values()) {

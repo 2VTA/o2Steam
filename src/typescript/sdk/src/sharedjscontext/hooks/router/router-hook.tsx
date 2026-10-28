@@ -6,7 +6,7 @@ import { MillenniumRouterState, MillenniumRouterStateContextProvider, RoutePatch
 import { Logger } from '../../logger';
 import { EUIMode } from '../../globals/steam-client/shared';
 import { afterPatch, findInReactTree, findInTree, getReactRoot, injectFCTrampoline, Patch, sleep, wrapReactType } from '../../utils';
-import { findModuleByExport } from '../../webpack';
+import { findModuleByExport, refreshModuleCache } from '../../webpack';
 import { ErrorBoundary } from '../../components';
 
 declare global {
@@ -46,32 +46,8 @@ class RouterHook extends Logger {
 		window.__ROUTER_HOOK_INSTANCE?.deinit?.();
 		window.__ROUTER_HOOK_INSTANCE = this;
 
-		const reactRouterStackModule = findModuleByExport((e) => e == 'router-backstack', 20);
-		if (reactRouterStackModule) {
-			this.Route =
-				Object.values(reactRouterStackModule).find((e) => typeof e == 'function' && /routePath:.\.match\?\.path./.test(e.toString())) ||
-				Object.values(reactRouterStackModule).find((e) => typeof e == 'function' && /routePath:null===\(.=.\.match\)/.test(e.toString()));
-			if (!this.Route) {
-				this.error('Failed to find Route component');
-			}
-		} else {
-			this.error('Failed to find router stack module');
-		}
-
-		const routerModule = findModuleByExport((e) => e?.displayName == 'Router');
-		if (routerModule) {
-			this.DesktopRoute = Object.values(routerModule).find(
-				(e) =>
-					typeof e == 'function' &&
-					e?.prototype?.render?.toString()?.includes('props.computedMatch') &&
-					e?.prototype?.render?.toString()?.includes('.Children.count('),
-			);
-			if (!this.DesktopRoute) {
-				this.error('Failed to find DesktopRoute component');
-			}
-		} else {
-			this.error('Failed to find router module, desktop routes will not work');
-		}
+		this.resolveComponents(true);
+		if (!this.Route || !this.DesktopRoute) this.retryResolveComponents();
 
 		this.modeChangeRegistration = SteamClient.UI.RegisterForUIModeChanged((mode: EUIMode) => {
 			this.debug(`UI mode changed to ${mode}`);
@@ -93,6 +69,52 @@ class RouterHook extends Logger {
 					break;
 			}
 		});
+	}
+
+	private resolveRetryTimer?: number;
+
+	// Finds Steam's Route and DesktopRoute components. Their modules can still be missing from the
+	// module cache this early on (Steam loads that part of its UI in a later chunk), so this is
+	// run again, with a refreshed cache, until both are found.
+	private resolveComponents(logErrors: boolean) {
+		if (!this.Route) {
+			const reactRouterStackModule = findModuleByExport((e) => e == 'router-backstack', 20);
+			if (reactRouterStackModule) {
+				this.Route =
+					Object.values(reactRouterStackModule).find((e) => typeof e == 'function' && /routePath:[\w$]+\.match\?\.path./.test(e.toString())) ||
+					Object.values(reactRouterStackModule).find((e) => typeof e == 'function' && /routePath:null===\(.=.\.match\)/.test(e.toString()));
+				if (!this.Route && logErrors) this.error('Failed to find Route component');
+			} else if (logErrors) {
+				this.error('Failed to find router stack module');
+			}
+		}
+
+		if (!this.DesktopRoute) {
+			const routerModule = findModuleByExport((e) => e?.displayName == 'Router');
+			if (routerModule) {
+				this.DesktopRoute = Object.values(routerModule).find((e) => typeof e == 'function' && e?.prototype?.render?.toString()?.includes('props.computedMatch'));
+				if (!this.DesktopRoute && logErrors) this.error('Failed to find DesktopRoute component');
+			} else if (logErrors) {
+				this.error('Failed to find router module, desktop routes will not work');
+			}
+		}
+	}
+
+	private retryResolveComponents() {
+		let tries = 0;
+		this.resolveRetryTimer = window.setInterval(() => {
+			tries++;
+			const added = refreshModuleCache();
+			this.resolveComponents(false);
+
+			if (this.Route && this.DesktopRoute) {
+				window.clearInterval(this.resolveRetryTimer);
+				this.log(`Found the router components after ${tries} retries (${added} modules added at the last one).`);
+			} else if (tries >= 240) {
+				window.clearInterval(this.resolveRetryTimer);
+				this.error(`Still missing router components after ${tries} retries: Route=${!!this.Route} DesktopRoute=${!!this.DesktopRoute}`);
+			}
+		}, 500);
 	}
 
 	private async patchGamepadRouter() {
@@ -390,6 +412,7 @@ class RouterHook extends Logger {
 	}
 
 	deinit() {
+		window.clearInterval(this.resolveRetryTimer);
 		this.modeChangeRegistration?.unregister();
 		this.gamepadRouterPatch?.unpatch();
 		this.desktopRouterPatch?.unpatch();
