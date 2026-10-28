@@ -635,15 +635,28 @@ a:hover {
 	color: var(--o2-dim) !important;
 }
 
+/* "+" (add an account): one dashed frame on the icon only, filled on hover */
 .UserChooser .User.New {
-	outline: 1px dashed var(--o2-dim);
-	outline-offset: 2px;
+	outline: none !important;
+	background: none !important;
 	color: var(--o2-fg) !important;
 }
 
-.UserChooser .User.New:hover {
+.UserChooser .User.New .Icon {
+	outline: 1px dashed var(--o2-dim) !important;
+	outline-offset: 2px;
+}
+
+.UserChooser .User.New:hover .Icon,
+.UserChooser .User.New.gpfocus .Icon {
+	outline: 2px solid var(--o2-fg) !important;
 	background: var(--o2-fg) !important;
+}
+
+.UserChooser .User.New:hover .Icon *,
+.UserChooser .User.New.gpfocus .Icon * {
 	color: var(--o2-black) !important;
+	fill: var(--o2-black) !important;
 }
 
 .UserChooser .MoreMenuButton {
