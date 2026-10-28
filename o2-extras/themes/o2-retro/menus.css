@@ -39,3 +39,25 @@ body *:hover * {
 	text-shadow: none !important;
 	fill: #000 !important;
 }
+
+/* terminal cursor: a ">" appears to the left of the item under the mouse (or picked with the keyboard).
+   It sits in the item's left padding so the text doesn't move. */
+.contextMenuItem {
+	position: relative;
+}
+
+.contextMenuItem::before {
+	content: ">";
+	position: absolute;
+	left: 6px;
+	top: 50%;
+	transform: translateY(-50%);
+	opacity: 0;
+	background: transparent !important;
+}
+
+.contextMenuItem:hover::before,
+.contextMenuItem.active::before,
+.contextMenuItem:focus-visible::before {
+	opacity: 1;
+}
