@@ -418,6 +418,12 @@ nlohmann::json head::theme_config_store::set_condition(const std::string& theme,
     CONFIG.set({ "themes", "conditions", theme, condition }, newData, true);
     CONFIG.save_to_disk();
 
+    /** o2steam: re-register the web page stylesheets so store/community pages follow the change too */
+    if (theme == active_theme_name) {
+        m_theme_webkit_mgr->unregister_all();
+        start_webkit_hook(theme_data, active_theme_name);
+    }
+
     return {
         { "success", true }  /** just assume it worked, too laze to impl :) */
     };

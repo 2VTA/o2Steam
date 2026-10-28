@@ -28,6 +28,7 @@
  * SOFTWARE.
  */
 
+import { reapplyThemeToAllWindows } from '../patcher';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
 	Classes,
@@ -135,6 +136,7 @@ export class RenderThemeEditor extends React.Component<ThemeEditorProps> {
 				if (success) {
 					store && (store[conditionName] = enabled ? 'yes' : 'no');
 					setIsChecked(enabled);
+					reapplyThemeToAllWindows();
 				}
 			});
 		};
@@ -142,6 +144,7 @@ export class RenderThemeEditor extends React.Component<ThemeEditorProps> {
 		const onDropdownChange = (data: SingleDropdownOption) => {
 			this.UpdateLocalCondition(conditionName, data.label as string).then((success) => {
 				success && store && (store[conditionName] = data.label as string);
+				success && reapplyThemeToAllWindows();
 			});
 		};
 
@@ -181,6 +184,7 @@ export class RenderThemeEditor extends React.Component<ThemeEditorProps> {
 								this.UpdateLocalCondition(conditionName, String(newValue)).then((success) => {
 									if (success) {
 										store && (store[conditionName] = String(newValue));
+										reapplyThemeToAllWindows();
 									}
 								});
 							}}

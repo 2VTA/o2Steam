@@ -156,6 +156,18 @@ export function patchDocumentContext(windowContext: any) {
 	applyO2Restyle(document);
 }
 
+/** o2steam: re-applies the active theme (and its saved conditions) to every open window, e.g. after a setting changed. */
+export function reapplyThemeToAllWindows() {
+	for (const popup of g_PopupManager?.GetPopups() ?? []) {
+		const doc: Document | undefined = popup?.window?.document;
+		if (!doc) continue;
+		doc.querySelectorAll('link#millennium-injected').forEach((link) => {
+			if ((link as HTMLLinkElement).href.includes('/v1/themes/')) link.remove();
+		});
+		patchDocumentContext(popup);
+	}
+}
+
 export function patchMissedDocuments() {
 	for (const popup of g_PopupManager?.GetPopups()) {
 		if (popup?.window?.HAS_INJECTED_THEME === undefined) {

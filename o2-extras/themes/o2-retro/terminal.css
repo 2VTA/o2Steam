@@ -137,6 +137,22 @@ h2 {
 .SuperNavMenu .MenuButton {
 	color: var(--o2-dim) !important;
 	padding: 0 2px;
+	/* Steam sizes the tab to its text; leave room for the brackets */
+	width: max-content !important;
+	max-width: none !important;
+	overflow: visible !important;
+	text-overflow: clip !important;
+	white-space: nowrap !important;
+}
+
+.SuperNavMenu,
+.SuperNav {
+	overflow: visible !important;
+}
+
+.SuperNavMenu {
+	width: auto !important;
+	max-width: none !important;
 }
 
 .SuperNavMenu .MenuButton::before {
@@ -378,6 +394,12 @@ h2 {
 .PlayButton.ButtonChild {
 	background: var(--o2-fg) !important;
 	background-image: none !important;
+	color: var(--o2-black) !important;
+	text-shadow: none !important;
+}
+
+.PlayButton *,
+.PlayButton .ButtonText {
 	color: var(--o2-black) !important;
 	text-shadow: none !important;
 }
