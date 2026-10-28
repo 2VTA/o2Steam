@@ -773,3 +773,37 @@ a:hover {
 		animation: none !important;
 	}
 }
+
+/* ---- o2steam logo instead of Steam's on the sign-in screen: Steam's icon in the phosphor colour
+   (masked from assets/steam.svg, Steam's own icon file) and "> o2steam_" beside it ---------------- */
+.LogoContainer {
+	display: flex !important;
+	align-items: center;
+	gap: 14px;
+}
+
+.LogoContainer .HeaderLogo {
+	display: none !important;
+}
+
+.LogoContainer::before {
+	content: "";
+	flex: none;
+	width: 44px;
+	height: 44px;
+	background: var(--o2-fg);
+	-webkit-mask: url("assets/steam.svg") center / contain no-repeat;
+	mask: url("assets/steam.svg") center / contain no-repeat;
+	filter: drop-shadow(0 0 5px var(--o2-fg));
+}
+
+.LogoContainer::after {
+	content: "> o2steam_";
+	white-space: nowrap;
+	font-family: var(--o2-font) !important;
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	color: var(--o2-fg);
+	text-shadow: 0 0 6px currentColor;
+}
