@@ -2,7 +2,7 @@
 	"name": "o2 Retro Terminal",
 	"description": "A CRT terminal look for Steam: phosphor colours, scanlines and glow. Nothing is loaded from the internet.",
 	"author": "Ryder (o2cord)",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"tags": [
 		"Retro",
 		"Terminal",
@@ -81,6 +81,28 @@
 		}
 	],
 	"Conditions": {
+		"Phosphor tint": {
+			"description": "> How strongly the phosphor colour covers the screen. 100 is a pure one-colour screen; lower keeps more of Steam's own colours.",
+			"default": "55",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-tint"
+			}
+		},
+		"Colour removal": {
+			"description": "> 0 keeps every colour, 100 turns the picture black and white before the phosphor colour is applied.",
+			"default": "0",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-gray"
+			}
+		},
 		"Phosphor colour": {
 			"description": "> The colour of the screen, like the profiles in cool-retro-term.\n\n- Amber / Green / Apple ][ / Red / Blue / Cyan / Plasma / VGA grey",
 			"default": "Amber",

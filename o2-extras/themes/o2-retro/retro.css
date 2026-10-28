@@ -2,14 +2,17 @@
  * o2 Retro Terminal - a CRT look for Steam, after the RetroTerminal theme in o2cord.
  *
  * Everything is drawn without touching Steam's own class names, so it keeps working when Steam updates:
- *  - body is made grayscale, then a fixed layer on top multiplies it by the phosphor colour
- *    (black stays black, white becomes the phosphor colour)
+ *  - a fixed layer on top multiplies everything by the phosphor colour mixed with white
+ *    ("Phosphor tint" slider: 100 = pure one-colour screen, lower keeps more of the real colours)
+ *  - "Colour removal" slider greys the screen out first (100 = black, white and phosphor only)
  *  - a second fixed layer paints scanlines and the dark curved corners
  *  - text gets a small glow, fonts are the system monospace ones
  * No fonts, pictures or scripts are loaded from the internet.
  */
 
-html:root {
+:where(:root) {
+	--o2-tint: 55%;
+	--o2-gray: 0%;
 	--o2-fg: #ff8100;
 	--o2-bg: #000000;
 	--o2-scan: 0.22;
@@ -25,7 +28,7 @@ html {
 }
 
 body {
-	filter: grayscale(1) contrast(1.2) brightness(1.35);
+	filter: grayscale(var(--o2-gray)) contrast(1.1) brightness(1.2);
 	text-shadow: 0 0 var(--o2-glow) currentColor;
 }
 
@@ -36,7 +39,7 @@ html::before {
 	inset: 0;
 	z-index: 2147483646;
 	pointer-events: none;
-	background: var(--o2-fg);
+	background: color-mix(in srgb, var(--o2-fg) var(--o2-tint), white);
 	mix-blend-mode: multiply;
 }
 
