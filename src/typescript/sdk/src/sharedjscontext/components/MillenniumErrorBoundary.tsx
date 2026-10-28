@@ -90,7 +90,7 @@ const MillenniumErrorBoundary: FunctionComponent<MillenniumErrorBoundaryProps> =
 		const url = startConfig?.millenniumUpdates?.platformRelease?.browser_download_url;
 		const size = startConfig?.millenniumUpdates?.platformRelease?.size ?? 0;
 		if (!url) return;
-		addLogLine('Starting Millennium update...');
+		addLogLine('Starting o2steam update...');
 		await doUpdateMillennium(url, size, false);
 		restartSteam();
 	};

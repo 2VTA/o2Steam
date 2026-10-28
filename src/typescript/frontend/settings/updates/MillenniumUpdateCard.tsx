@@ -122,7 +122,7 @@ export const MillenniumUpdateCard = ({ millenniumUpdates }: { millenniumUpdates:
 				progress={ctx.millenniumUpdateProgress.progress}
 				statusText={ctx.millenniumUpdateProgress.statusText}
 				onUpdateClick={StartUpdate}
-				toolTipText={'Millennium to ' + millenniumUpdates?.newVersion?.tag_name}
+				toolTipText={'o2steam to ' + millenniumUpdates?.newVersion?.tag_name}
 				disabled={pluginSelf?.millenniumUpdates?.updateInProgress}
 				downloadSize={millenniumUpdates?.platformRelease?.size}
 			/>

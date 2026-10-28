@@ -80,7 +80,7 @@ static HANDLE s_shutdown_event = nullptr;
 static HANDLE s_watchdog_process = nullptr;
 
 static const crash_report_info s_info = {
-    "Millennium Crash Report", "millennium.dll", nullptr, nullptr, "[millennium]",
+    "o2steam Crash Report", "millennium.dll", nullptr, nullptr, "[millennium]",
 };
 
 static bool millennium_watchdog_available()
@@ -119,7 +119,7 @@ static void spawn_watchdog()
     strncpy(s_ctx.shm->crash_dump_base, s_crash_dump_base.c_str(), sizeof(s_ctx.shm->crash_dump_base) - 1);
     strncpy(s_ctx.shm->component_name, "millennium.dll", sizeof(s_ctx.shm->component_name) - 1);
     strncpy(s_ctx.shm->log_prefix, "[millennium]", sizeof(s_ctx.shm->log_prefix) - 1);
-    strncpy(s_ctx.shm->report_title, "Millennium Crash Report", sizeof(s_ctx.shm->report_title) - 1);
+    strncpy(s_ctx.shm->report_title, "o2steam Crash Report", sizeof(s_ctx.shm->report_title) - 1);
 
     char req_name[128], done_name[128], stop_name[128];
     crash_ipc_request_event_name(req_name, sizeof(req_name), steam_pid);
@@ -172,7 +172,7 @@ void install_millennium_crash_handler()
 #else /* !_WIN32 */
 
 static const crash_report_info s_info = {
-    "Millennium Crash Report", "libmillennium", nullptr, nullptr, "[millennium]",
+    "o2steam Crash Report", "libmillennium", nullptr, nullptr, "[millennium]",
 };
 
 static crash_handler_signal_ctx s_signal_ctx{};

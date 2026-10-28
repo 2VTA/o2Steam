@@ -65,7 +65,7 @@ void install_crash_handler(const char* plugin_name, const char* backend_file, co
     s_backend_file = backend_file;
     s_crash_dump_dir = crash_dump_dir;
 
-    s_info.title = "Millennium Plugin Crash Report";
+    s_info.title = "o2steam Plugin Crash Report";
     s_info.component = nullptr;
     s_info.plugin_name = s_plugin_name.c_str();
     s_info.backend_file = s_backend_file.c_str();
@@ -122,7 +122,7 @@ static void plugin_write_shm_fields(crash_ipc_region* shm)
     memcpy(shm->log_prefix, "[lua-host]", 11);
 
     memset(shm->report_title, 0, sizeof(shm->report_title));
-    memcpy(shm->report_title, "Millennium Plugin Crash Report", 31);
+    memcpy(shm->report_title, "o2steam Plugin Crash Report", sizeof("o2steam Plugin Crash Report")); // the literal is shorter than before, so use its real size
 }
 
 static BOOL WINAPI console_ctrl_handler(DWORD event)
@@ -200,7 +200,7 @@ void install_crash_handler(const char* plugin_name, const char* backend_file, co
     memset(s_buf_backend_file, 0, sizeof(s_buf_backend_file));
     strncpy(s_buf_backend_file, backend_file, sizeof(s_buf_backend_file) - 1);
 
-    s_info.title = "Millennium Plugin Crash Report";
+    s_info.title = "o2steam Plugin Crash Report";
     s_info.component = nullptr;
     s_info.plugin_name = s_buf_plugin_name;
     s_info.backend_file = s_buf_backend_file;

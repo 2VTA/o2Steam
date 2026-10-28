@@ -8,7 +8,7 @@ export async function updateMillennium(background: boolean) {
 
 	if (!downloadUrl) {
 		toaster.toast({
-			title: `Millennium Update Error`,
+			title: `o2steam Update Error`,
 			body: `No download URL found for update.`,
 			logo: <IconsModule.ExclamationPoint className={deferredSettingLabelClasses.Icon} />,
 			duration: 5000,

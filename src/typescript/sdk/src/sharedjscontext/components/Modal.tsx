@@ -44,7 +44,7 @@ export const showModal = (
 	modal: ReactNode,
 	parent?: EventTarget,
 	props: ShowModalProps = {
-		strTitle: 'Millennium Dialog',
+		strTitle: 'o2steam Dialog',
 		bHideMainWindowForPopouts: false,
 	},
 ): ShowModalResult => {

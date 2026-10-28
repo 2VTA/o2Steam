@@ -75,7 +75,7 @@ ipc_main::javascript_evaluation_result ipc_main::evaluate_javascript_expression(
         }
         return javascript_evaluation_result(std::move(response), true);
     } catch (const nlohmann::detail::exception& ex) {
-        return javascript_evaluation_result({}, false, std::format("Millennium couldn't decode the response from {}, reason: {}", script, ex.what()));
+        return javascript_evaluation_result({}, false, std::format("o2steam couldn't decode the response from {}, reason: {}", script, ex.what()));
     } catch (const std::exception&) {
         return javascript_evaluation_result({}, false, "frontend is not loaded!");
     }

@@ -33,11 +33,11 @@ export function getLikelyErrorSource(error?: string): ErrorSource {
 	}
 
 	if (error && millenniumFrontendRegex.test(error)) {
-		return ['the Millennium frontend', false, false];
+		return ['the o2steam frontend', false, false];
 	}
 
 	if (error && millenniumApiRegex.test(error)) {
-		return ['the Millennium API', false, false];
+		return ['the o2steam API', false, false];
 	}
 
 	return ['Steam', false, true];

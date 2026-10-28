@@ -98,7 +98,7 @@ void millennium_updater::check_for_updates(const std::string& channel_override)
     std::string channel = channel_override.empty() ? CONFIG.get({ "general", "millenniumUpdateChannel" }, "stable").get<std::string>() : channel_override;
 
     if (!checkForUpdates) {
-        logger.warn("User has disabled update checking for Millennium.");
+        logger.warn("User has disabled update checking for o2steam.");
         return;
     }
 
@@ -140,7 +140,7 @@ void millennium_updater::check_for_updates(const std::string& channel_override)
             return;
         }
 
-        logger.log("Latest Millennium release: {}", latest_release.value("tag_name", "unknown"));
+        logger.log("Latest o2steam release: {}", latest_release.value("tag_name", "unknown"));
 
         if (!latest_release.contains("tag_name")) {
             LOG_ERROR("Latest release missing required 'tag_name' field.");
@@ -151,7 +151,7 @@ void millennium_updater::check_for_updates(const std::string& channel_override)
         try {
             current_version = parse_version(MILLENNIUM_VERSION);
         } catch (...) {
-            LOG_ERROR("Failed to parse current Millennium version.");
+            LOG_ERROR("Failed to parse current o2steam version.");
             return;
         }
 
@@ -175,7 +175,7 @@ void millennium_updater::check_for_updates(const std::string& channel_override)
                 logger.warn("Current version {} is newer than latest release {}.", current_version, latest_version);
                 m_has_updates = false;
             } else {
-                logger.log("Millennium is up to date.");
+                logger.log("o2steam is up to date.");
                 m_has_updates = false;
             }
         }
@@ -284,17 +284,17 @@ void millennium_updater::win32_move_old_millennium_version([[maybe_unused]] std:
     std::filesystem::path steam_path = platform::get_steam_path();
 
     if (steam_path.empty()) {
-        logger.warn("Steam path not found, skipping old Millennium cleanup.");
+        logger.warn("Steam path not found, skipping old o2steam cleanup.");
         return;
     }
 
     std::filesystem::path temp_path = steam_path / MILLENNIUM_UPDATER_TEMP_DIR;
-    logger.log("Using temporary directory for moving old Millennium files: {}", temp_path.string());
+    logger.log("Using temporary directory for moving old o2steam files: {}", temp_path.string());
 
     std::error_code ec;
     std::filesystem::create_directories(temp_path, ec);
     if (ec) {
-        logger.warn("Failed to create temporary directory for moving old Millennium files: {}", ec.message());
+        logger.warn("Failed to create temporary directory for moving old o2steam files: {}", ec.message());
         return;
     }
 
@@ -319,7 +319,7 @@ void millennium_updater::win32_move_old_millennium_version([[maybe_unused]] std:
         std::filesystem::path source_wide = source_path.wstring();
         std::filesystem::path dest_wide = dest_path.wstring();
 
-        logger.log("Moving old Millennium file {} to temporary location {}", source_path.string(), dest_path.string());
+        logger.log("Moving old o2steam file {} to temporary location {}", source_path.string(), dest_path.string());
 
         if (!MoveFileExW(source_wide.c_str(), dest_wide.c_str(), MOVEFILE_REPLACE_EXISTING)) {
             const DWORD error = GetLastError();
@@ -339,7 +339,7 @@ void millennium_updater::win32_move_old_millennium_version([[maybe_unused]] std:
         }
     }
 
-    logger.log("Old Millennium version cleanup completed. Files moved: {}", any_files_moved);
+    logger.log("Old o2steam version cleanup completed. Files moved: {}", any_files_moved);
 #endif
 }
 
@@ -414,7 +414,7 @@ void millennium_updater::update_impl(const std::string& downloadUrl, const size_
         }
 #endif
         logger.log("Update completed successfully.");
-        this->dispatch_progress_to_frontend("Successfully updated Millennium!", 100.0f, true);
+        this->dispatch_progress_to_frontend("Successfully updated o2steam!", 100.0f, true);
         update_state(true);
 
     } catch (const std::exception& e) {
@@ -468,7 +468,7 @@ void millennium_updater::update(const std::string& downloadUrl, const size_t dow
     };
 
     if (background) {
-        logger.log("Starting Millennium update in background thread...");
+        logger.log("Starting o2steam update in background thread...");
         m_thread_pool->enqueue(start_update);
         return;
     }
@@ -521,7 +521,7 @@ void millennium_updater::win32_update_legacy_shims()
 
     } catch (std::exception& e) {
         LOG_ERROR("Failed to update {}: {}", SHIM_LOADER_PATH, e.what());
-        platform::messagebox::show("Millennium", std::format("Failed to update {}, it's recommended that you reinstall Millennium.", SHIM_LOADER_PATH),
+        platform::messagebox::show("Millennium", std::format("Failed to update {}, it's recommended that you reinstall o2steam.", SHIM_LOADER_PATH),
                                    platform::messagebox::error);
     }
 #endif

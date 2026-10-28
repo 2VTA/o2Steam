@@ -308,7 +308,7 @@ void ffi_binder::cdp_proxy_call(const std::string& plugin_name, int callback_id,
     const bool targets_shared_js = target_session.has_value() && (target_session.value() == m_client->get_shared_js_session_id());
 
     if (BLOCKED_CDP_METHODS_ALWAYS.count(method) || (targets_shared_js && BLOCKED_CDP_METHODS_SHARED_JS.count(method))) {
-        const std::string msg = std::format("Millennium prohibits calls to '{}' for user safety", method);
+        const std::string msg = std::format("o2steam prohibits calls to '{}' for user safety", method);
         json eval_params = {
             { "contextId", main_ctx_id },
             { "expression", std::format("{}({}, {})", ffi_constants::millennium_cdp_reject, callback_id, json(msg).dump()) }

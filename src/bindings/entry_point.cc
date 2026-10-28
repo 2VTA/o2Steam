@@ -257,7 +257,7 @@ builtin_payload head::millennium_backend::Core_LoadQuickCss(const builtin_payloa
     const std::string quick_css_path = get_quick_css_path();
 
     if (!std::filesystem::exists(quick_css_path)) {
-        platform::write_file(quick_css_path, "/* Quick CSS file created by Millennium */\n");
+        platform::write_file(quick_css_path, "/* Quick CSS file created by o2steam */\n");
     }
 
     return platform::read_file(quick_css_path);

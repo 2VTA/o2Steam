@@ -117,7 +117,7 @@ static void handle_crash(HANDLE steam_process, const crash_ipc_region* shm)
     if (!f) f = stderr;
 
     fprintf(f, "=== %s ===\n\n", info.title);
-    fprintf(f, "Millennium Version : %s\n", MILLENNIUM_VERSION);
+    fprintf(f, "o2steam Version : %s\n", MILLENNIUM_VERSION);
     fprintf(f, "Git Commit         : %s\n", GIT_COMMIT_HASH);
 
     if (info.plugin_name) {
@@ -148,9 +148,9 @@ int main(int argc, char* argv[])
     if (argc < 2) {
         SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
         MessageBoxA(nullptr,
-                    "This is an internal Millennium runtime component.\n"
+                    "This is an internal o2steam runtime component.\n"
                     "It is not meant to be run directly.\n\n"
-                    "Please launch Steam with Millennium instead.",
+                    "Please launch Steam with o2steam instead.",
                     "millennium.crashhandler64.exe", MB_OK | MB_ICONINFORMATION);
         return 1;
     }

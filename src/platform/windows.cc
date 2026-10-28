@@ -93,7 +93,7 @@ VOID Win32_AttachWebHelperHook(VOID)
     const auto hookPath = platform::get_millennium_path() / "lib" / "millennium.hhx64.dll";
 
     if (!std::filesystem::exists(hookPath)) {
-        platform::messagebox::show("Millennium Error", "Millennium webhelper hook is missing. Please reinstall Millennium.", platform::messagebox::error);
+        platform::messagebox::show("o2steam Error", "o2steam webhelper hook is missing. Please reinstall o2steam.", platform::messagebox::error);
         return;
     }
 
@@ -120,8 +120,8 @@ VOID Win32_AttachWebHelperHook(VOID)
         BOOL result = CreateHardLinkW(targetPath.wstring().c_str(), hookPath.wstring().c_str(), NULL);
         if (!result) {
             platform::messagebox::show(
-                "Millennium Error",
-                std::format("Failed to create hardlink for Millennium webhelper hook.\nTarget: {}\nError Code: {}\nMake sure Steam is not running and try again.",
+                "o2steam Error",
+                std::format("Failed to create hardlink for o2steam webhelper hook.\nTarget: {}\nError Code: {}\nMake sure Steam is not running and try again.",
                             targetPath.string(), GetLastError())
                     .c_str(),
                 platform::messagebox::error);
@@ -140,7 +140,7 @@ VOID Win32_MoveVersionHook(VOID)
 
     if (!MoveFileExW(versionHookPath.wstring().c_str(), targetPath.wstring().c_str(), MOVEFILE_REPLACE_EXISTING)) {
         const DWORD error = GetLastError();
-        platform::messagebox::show("Millennium Error", std::format("Failed to move legacy version.dll hook.\nError Code: {}", error).c_str(), platform::messagebox::error);
+        platform::messagebox::show("o2steam Error", std::format("Failed to move legacy version.dll hook.\nError Code: {}", error).c_str(), platform::messagebox::error);
     }
 }
 
@@ -272,7 +272,7 @@ static VOID Win32_MigrateLegacyLayout(VOID)
 VOID Win32_AttachMillennium(VOID)
 {
     if (!platform::initialize_steam_hooks()) {
-        platform::messagebox::show("Millennium Error", "Failed to initialize Steam hooks, Millennium cannot continue startup.", platform::messagebox::error);
+        platform::messagebox::show("o2steam Error", "Failed to initialize Steam hooks, o2steam cannot continue startup.", platform::messagebox::error);
     }
 
     install_millennium_crash_handler();
@@ -285,7 +285,7 @@ VOID Win32_AttachMillennium(VOID)
     platform::environment::setup();
 
     g_millennium->entry();
-    logger.log("[Win32_AttachMillennium] Millennium main function has returned, proceeding with shutdown...");
+    logger.log("[Win32_AttachMillennium] o2steam main function has returned, proceeding with shutdown...");
 
     uninitialize_steam_hooks();
     /** Deallocate the developer console */
@@ -302,19 +302,19 @@ VOID Win32_AttachMillennium(VOID)
  */
 VOID Win32_DetachMillennium(VOID)
 {
-    logger.print(" MAIN ", "Shutting Millennium down...", COL_MAGENTA);
+    logger.print(" MAIN ", "Shutting o2steam down...", COL_MAGENTA);
     millennium_lifecycle::get().terminate.notify();
-    logger.log("Waiting for Millennium thread to exit...");
+    logger.log("Waiting for o2steam thread to exit...");
 
     if (!g_millenniumThread.joinable()) {
-        platform::messagebox::show("Warning", "Millennium thread is not joinable, skipping join. This is likely because Millennium failed to start properly.",
+        platform::messagebox::show("Warning", "o2steam thread is not joinable, skipping join. This is likely because o2steam failed to start properly.",
                                    platform::messagebox::warn);
         return;
     }
 
     g_millenniumThread.join();
     g_millennium.reset();
-    logger.log("Millennium thread has exited.");
+    logger.log("o2steam thread has exited.");
 }
 
 /**
@@ -327,7 +327,7 @@ DLL_EXPORT INT WINAPI DllMain([[maybe_unused]] HINSTANCE hinstDLL, DWORD fdwReas
     switch (fdwReason) {
         case DLL_PROCESS_ATTACH:
         {
-            logger.log("Millennium-x86_64@{} attached...", MILLENNIUM_VERSION);
+            logger.log("o2steam-x86_64@{} attached...", MILLENNIUM_VERSION);
             register_dll_notifications();
 
             g_millenniumThread = std::thread(Win32_AttachMillennium);
