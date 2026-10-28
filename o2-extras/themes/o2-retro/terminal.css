@@ -692,3 +692,52 @@ a:hover {
 .FieldLabel {
 	color: var(--o2-fg) !important;
 }
+
+/* ---- typed-out text: names on "Who's playing?" type themselves in, and again on hover ----------- */
+@keyframes o2-type {
+	from {
+		clip-path: inset(0 100% 0 0);
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+	}
+}
+
+@keyframes o2-type-again {
+	from {
+		clip-path: inset(0 100% 0 0);
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+	}
+}
+
+.WhosPlaying {
+	animation: o2-type 0.6s steps(24, end) both;
+}
+
+.UserChooser .Name {
+	animation: o2-type 0.45s steps(18, end) both;
+	animation-delay: 0.55s;
+}
+
+.UserChooser .Name.Account {
+	animation-delay: 0.8s;
+}
+
+.UserChooser .User:hover .Name,
+.UserChooser .User.gpfocus .Name {
+	animation: o2-type-again 0.3s steps(14, end) both;
+}
+
+.UserChooser .User:hover .Name.Account,
+.UserChooser .User.gpfocus .Name.Account {
+	animation-delay: 0.12s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.WhosPlaying,
+	.UserChooser .Name {
+		animation: none !important;
+	}
+}
