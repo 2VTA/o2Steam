@@ -1,0 +1,163 @@
+/*
+ * o2 Retro Terminal - "Full terminal" style: flat, square, boxed, like a text-mode screen.
+ *
+ * Colours here are only ever black, white and grey on purpose: retro.css multiplies the whole screen by
+ * the phosphor colour, so white becomes the phosphor colour and the borders/hovers follow the profile.
+ * Only class names Steam keeps readable are used (DialogButton, DialogInput...), plus the classic web classes.
+ */
+
+/* ---- everything flat and square ------------------------------------------------------------ */
+* {
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+/* ---- scrollbars ---------------------------------------------------------------------------- */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: #fff #000 !important;
+}
+
+/* ---- buttons (Steam client) ---------------------------------------------------------------- */
+.DialogButton,
+.DialogButton._DialogLayout {
+	background: #000 !important;
+	background-image: none !important;
+	border: 1px solid #fff !important;
+	color: #fff !important;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.DialogButton:hover,
+.DialogButton.gpfocus,
+.DialogButton:focus-visible {
+	background: #fff !important;
+	color: #000 !important;
+	text-shadow: none !important;
+}
+
+.DialogButton.Primary {
+	border-width: 2px !important;
+}
+
+.DialogButton.Destructive {
+	border-style: dashed !important;
+}
+
+.DialogButton.Disabled,
+.DialogButton:disabled {
+	opacity: 0.4;
+}
+
+/* ---- inputs and dropdowns ------------------------------------------------------------------ */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+textarea,
+select,
+.DialogInput,
+.DialogTextInputBase,
+.DialogDropDown {
+	background: #000 !important;
+	background-image: none !important;
+	border: 1px solid #fff !important;
+	color: #fff !important;
+	caret-color: #fff;
+}
+
+input::placeholder,
+textarea::placeholder {
+	color: #aaa !important;
+}
+
+/* ---- dialogs and headers ------------------------------------------------------------------- */
+.DialogHeader,
+.DialogControlsSectionHeader,
+h1,
+h2 {
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.DialogHeader {
+	border-bottom: 1px solid #fff;
+}
+
+.DialogControlsSectionHeader {
+	border-bottom: 1px dashed #fff;
+}
+
+.ModalDialogPopup {
+	border: 1px solid #fff !important;
+}
+
+/* ---- Steam web pages: buttons, menus, header ------------------------------------------------ */
+body {
+	background-color: #000 !important;
+	background-image: none !important;
+}
+
+[class*="btn_"],
+.btn_medium,
+.btn_small,
+.btn_green_steamui,
+.btn_blue_steamui,
+.btn_grey_steamui,
+.btn_green_white_innerfade,
+.btn_darkblue_white_innerfade,
+.btn_grey_black,
+.btn_profile_action,
+.pulldown,
+.popup_menu_btn {
+	background: #000 !important;
+	background-image: none !important;
+	border: 1px solid #fff !important;
+	color: #fff !important;
+	text-transform: uppercase;
+}
+
+[class*="btn_"] span,
+.pulldown span {
+	background: transparent !important;
+	background-image: none !important;
+	color: inherit !important;
+}
+
+[class*="btn_"]:hover,
+.pulldown:hover,
+.popup_menu_btn:hover {
+	background: #fff !important;
+	color: #000 !important;
+	text-shadow: none !important;
+}
+
+.popup_block_new,
+.popup_body,
+.popup_menu,
+.dropdown_menu,
+.newmodal,
+.newmodal_content,
+.store_nav .popup_menu,
+#global_header,
+.store_nav_area {
+	background: #000 !important;
+	background-image: none !important;
+	border: 1px solid #fff !important;
+}
+
+.popup_menu_item,
+.popup_menu .popup_menu_item {
+	background: #000 !important;
+	color: #fff !important;
+}
+
+.popup_menu_item:hover,
+.popup_menu .popup_menu_item:hover {
+	background: #fff !important;
+	color: #000 !important;
+	text-shadow: none !important;
+}
+
+/* a selected-text block caret feel: links get a plain underline instead of colour only */
+a:hover {
+	text-decoration: underline;
+}

@@ -350,6 +350,23 @@ builtin_payload head::millennium_backend::Core_SetBackendConfig(const builtin_pa
         /* pw == "" means user explicitly cleared the field */
     }
 
+    /*
+     * o2steam: the settings page keeps its own copy of the config from when it loaded. Plugins and themes are
+     * switched through their own calls (which write the backend config directly), so that copy goes stale and
+     * saving it here wiped "enabledPlugins" - plugins turned themselves off. The page never edits these two
+     * sections through this call, so keep what the backend has.
+     */
+    {
+        const auto current = CONFIG.get_all();
+        for (const char* section : { "plugins", "themes" })
+        {
+            if (current.contains(section))
+                incoming[section] = current[section];
+            else
+                incoming.erase(section);
+        }
+    }
+
     return CONFIG.set_all(incoming, args.value("skipPropagation", false));
 }
 

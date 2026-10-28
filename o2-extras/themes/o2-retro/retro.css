@@ -4,6 +4,8 @@
  * Everything is drawn without touching Steam's own class names, so it keeps working when Steam updates:
  *  - a fixed layer on top multiplies everything by the phosphor colour mixed with white
  *    ("Phosphor tint" slider: 100 = pure one-colour screen, lower keeps more of the real colours)
+ *  - a "color" blend layer pulls the hue toward the phosphor colour ("Colour shift" slider) so Steam's blue
+ *    interface turns amber/green/... while pictures keep most of their own colours
  *  - the "Black and white" colour mode (profiles/mono.css) greys the screen out first; it is a separate file
  *    because a filter on <body> would break fixed/sticky elements on web pages, so it is only used when chosen
  *  - a second fixed layer paints scanlines and the dark curved corners
@@ -13,6 +15,7 @@
 
 :where(:root) {
 	--o2-tint: 55%;
+	--o2-hue: 35%;
 	--o2-fg: #ff8100;
 	--o2-bg: #000000;
 	--o2-scan: 0.22;
@@ -38,6 +41,18 @@ html::before {
 	mix-blend-mode: multiply;
 }
 
+/* shifts the hue of the whole screen toward the phosphor colour while keeping brightness ("Colour shift" slider) */
+body::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	z-index: 2147483645;
+	pointer-events: none;
+	background: var(--o2-fg);
+	mix-blend-mode: color;
+	opacity: var(--o2-hue);
+}
+
 /* scanlines + dark corners */
 html::after {
 	content: "";
@@ -52,7 +67,7 @@ html::after {
 
 * {
 	font-family: var(--o2-font) !important;
-	scrollbar-color: var(--o2-fg) #000;
+	scrollbar-color: #fff #000;
 }
 
 input,

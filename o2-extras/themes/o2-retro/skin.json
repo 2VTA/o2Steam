@@ -2,7 +2,7 @@
 	"name": "o2 Retro Terminal",
 	"description": "A CRT terminal look for Steam: phosphor colours, scanlines and glow. Nothing is loaded from the internet.",
 	"author": "Ryder (o2cord)",
-	"version": "0.3.0",
+	"version": "0.5.0",
 	"tags": [
 		"Retro",
 		"Terminal",
@@ -13,63 +13,117 @@
 	"Patches": [
 		{
 			"MatchRegexString": "^Steam$",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": "^OverlayBrowser_Browser$",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": "^SP Overlay:",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": "Menu$",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css",
+				"menus.css"
+			]
 		},
 		{
 			"MatchRegexString": "Supernav$",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css",
+				"menus.css"
+			]
 		},
 		{
 			"MatchRegexString": "^notificationtoasts_",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": "^SteamBrowser_Find$",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": "^OverlayTab\\d+_Find$",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": "^Steam Big Picture Mode$",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": "^QuickAccess_",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": "^MainMenu_",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": ".friendsui-container",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": ".ModalDialogPopup",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": ".FullModalOverlay",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		},
 		{
 			"MatchRegexString": "^https?://(store\\.steampowered|steamcommunity|help\\.steampowered|checkout\\.steampowered)\\.com(/.*)?$",
-			"TargetCss": "retro.css"
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
+		},
+		{
+			"MatchRegexString": "^Sign in to Steam",
+			"TargetCss": [
+				"retro.css",
+				"terminal.css"
+			]
 		}
 	],
 	"Conditions": {
@@ -82,6 +136,17 @@
 				"step": 5,
 				"unit": "%",
 				"cssVariable": "--o2-tint"
+			}
+		},
+		"Colour shift": {
+			"description": "> How far Steam's own colours (the blue interface) are pulled toward the phosphor colour. 0 leaves them alone, 100 makes the interface one colour.",
+			"default": "35",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-hue"
 			}
 		},
 		"Colour mode": {
