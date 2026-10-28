@@ -572,3 +572,110 @@ body {
 a:hover {
 	text-decoration: underline;
 }
+
+/* ================================================================ sign in / "Who's playing?" */
+
+.LoginStaticBackground,
+.LoginAnimatedBackground {
+	background: var(--o2-black) !important;
+	background-image: none !important;
+}
+
+.Login .TitleBar,
+.Login .title-area {
+	background: var(--o2-black) !important;
+	border-bottom: 1px solid var(--o2-faint);
+}
+
+.HeaderLogo {
+	color: var(--o2-fg) !important;
+	fill: var(--o2-fg) !important;
+}
+
+.WhosPlaying {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--o2-fg) !important;
+}
+
+.WhosPlaying::before {
+	content: "> ";
+}
+
+.WhosPlaying::after {
+	content: "_";
+	animation: o2-cursor 1s steps(1, end) infinite;
+}
+
+.UserChooser .User .Icon {
+	background: var(--o2-black) !important;
+	outline: 1px solid var(--o2-dim);
+	outline-offset: 2px;
+}
+
+.UserChooser .User:hover .Icon,
+.UserChooser .User.gpfocus .Icon,
+.UserChooser .User:focus-within .Icon {
+	outline: 2px solid var(--o2-fg);
+}
+
+.UserChooser .User:hover .Name.Persona,
+.UserChooser .User.gpfocus .Name.Persona {
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
+	text-shadow: none !important;
+}
+
+.UserChooser .Name.Persona {
+	color: var(--o2-fg) !important;
+	padding: 0 2px;
+}
+
+.UserChooser .Name.Account {
+	color: var(--o2-dim) !important;
+}
+
+.UserChooser .User.New {
+	outline: 1px dashed var(--o2-dim);
+	outline-offset: 2px;
+	color: var(--o2-fg) !important;
+}
+
+.UserChooser .User.New:hover {
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
+}
+
+.UserChooser .MoreMenuButton {
+	background: var(--o2-black) !important;
+	border: 1px solid var(--o2-fg) !important;
+}
+
+/* ---- toggles everywhere: square rail, block switch ----------------------------------------------- */
+.ToggleRail {
+	background: var(--o2-black) !important;
+	border: 1px solid var(--o2-dim) !important;
+}
+
+.ToggleSwitch {
+	background: var(--o2-dim) !important;
+}
+
+.Toggle.On .ToggleRail {
+	border-color: var(--o2-fg) !important;
+	background: var(--o2-faint) !important;
+}
+
+.Toggle.On .ToggleSwitch {
+	background: var(--o2-fg) !important;
+}
+
+.Field.WithBottomSeparatorStandard::after,
+.Field.WithBottomSeparator::after {
+	background: none !important;
+	border-bottom: 1px dashed var(--o2-faint);
+}
+
+.FieldLabel {
+	color: var(--o2-fg) !important;
+}
