@@ -1,0 +1,2 @@
+html:root:root { --o2-tint: 100%; }
+body { filter: grayscale(1) contrast(1.2) brightness(1.3); }
