@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>o2steam-Installer</AssemblyName>
+    <RootNamespace>O2steamInstaller</RootNamespace>
+    <Version>0.1.0</Version>
+    <FileVersion>0.1.0.0</FileVersion>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <Company>o2steam</Company>
+    <Product>o2steam Installer</Product>
+    <Description>Installs or removes o2steam (a Millennium fork) for Steam.</Description>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>assets\o2steam.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="payload\o2steam.zip" LogicalName="o2steam.zip" />
+    <EmbeddedResource Include="assets\o2steam-logo.png" LogicalName="o2steam-logo.png" />
+    <EmbeddedResource Include="assets\o2steam.ico" LogicalName="o2steam.ico" />
+  </ItemGroup>
+</Project>
