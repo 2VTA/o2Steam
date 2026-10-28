@@ -1,3 +1,11 @@
+# o2steam
+
+o2steam is Ryder's fork of [Millennium](https://github.com/SteamClientHomebrew/Millennium), the open-source modding framework for Steam Client themes and plugins. It is released under the same MIT license; the original copyright and license notice are kept in [LICENSE.md](LICENSE.md). Millennium is made by SteamClientHomebrew and its contributors - this project is not affiliated with them or with Valve.
+
+Updates for o2steam come from this repository's releases, not from Millennium's.
+
+---
+
 # Millennium
 
 [Home Page](https://steambrew.app/) • [Discord](https://steambrew.app/discord) • [Documentation](https://docs.steambrew.app/)
