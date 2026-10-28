@@ -39,11 +39,133 @@
 #include "millennium/virtfs.h"
 #include "millennium/types.h"
 #include "millennium/target_url.h"
+#include "millennium/config.h"
 
 #include <nlohmann/json_fwd.hpp>
 #include <thread>
 
 std::atomic<unsigned long long> g_hookedModuleId{ 0 };
+
+/**
+ * o2steam: optional "block themes' external connections". When the setting is on, theme stylesheets are
+ * rewritten as they are served so that @import / url() pointing at a host outside Steam load nothing.
+ */
+namespace
+{
+bool host_is_allowed(std::string host)
+{
+    for (auto& c : host) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    if (auto colon = host.find(':'); colon != std::string::npos) host.erase(colon);
+
+    static const char* const exact[] = { "millennium.host", "steamloopback.host", "localhost", "127.0.0.1" };
+    static const char* const suffixes[] = { "steamstatic.com", "steampowered.com", "steamcommunity.com", "akamaihd.net", "steamcontent.com" };
+
+    for (const char* e : exact) if (host == e) return true;
+    for (const char* s : suffixes) {
+        const std::string suffix = s;
+        if (host == suffix) return true;
+        if (host.size() > suffix.size() && host.compare(host.size() - suffix.size(), suffix.size(), suffix) == 0 && host[host.size() - suffix.size() - 1] == '.') return true;
+    }
+    return false;
+}
+
+/** true when `ref` is an absolute http(s) / protocol-relative address whose host is not allowed */
+bool is_blocked_reference(const std::string& ref)
+{
+    size_t start = std::string::npos;
+    if (ref.rfind("https://", 0) == 0) start = 8;
+    else if (ref.rfind("http://", 0) == 0) start = 7;
+    else if (ref.rfind("//", 0) == 0) start = 2;
+    if (start == std::string::npos) return false;
+
+    size_t end = ref.find_first_of("/?#", start);
+    std::string host = ref.substr(start, end == std::string::npos ? std::string::npos : end - start);
+    if (auto at = host.rfind('@'); at != std::string::npos) host = host.substr(at + 1);
+    return !host_is_allowed(host);
+}
+
+std::string trim_css_ref(std::string s)
+{
+    const auto isSpace = [](char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; };
+    while (!s.empty() && isSpace(s.front())) s.erase(s.begin());
+    while (!s.empty() && isSpace(s.back())) s.pop_back();
+    if (s.size() >= 2 && (s.front() == '"' || s.front() == '\'') && s.back() == s.front()) s = s.substr(1, s.size() - 2);
+    return s;
+}
+
+bool starts_with_nocase(const std::string& s, size_t pos, const char* word)
+{
+    for (size_t i = 0; word[i]; ++i) {
+        if (pos + i >= s.size() || std::tolower(static_cast<unsigned char>(s[pos + i])) != word[i]) return false;
+    }
+    return true;
+}
+
+std::string block_external_css(const std::string& css)
+{
+    std::string out;
+    out.reserve(css.size());
+    bool afterImport = false;
+    size_t i = 0;
+
+    while (i < css.size()) {
+        if (css[i] == '/' && i + 1 < css.size() && css[i + 1] == '*') {
+            const size_t close = css.find("*/", i + 2);
+            const size_t stop = close == std::string::npos ? css.size() : close + 2;
+            out.append(css, i, stop - i);
+            i = stop;
+            continue;
+        }
+
+        if (starts_with_nocase(css, i, "@import")) {
+            afterImport = true;
+            out.append(css, i, 7);
+            i += 7;
+            continue;
+        }
+
+        if (starts_with_nocase(css, i, "url(")) {
+            const size_t close = css.find(')', i + 4);
+            if (close == std::string::npos) {
+                out.append(css, i, std::string::npos);
+                break;
+            }
+            const std::string ref = trim_css_ref(css.substr(i + 4, close - (i + 4)));
+            if (is_blocked_reference(ref)) {
+                out += afterImport ? "url(\"data:text/css,\")" : "url(\"data:,\")";
+            } else {
+                out.append(css, i, close + 1 - i);
+            }
+            i = close + 1;
+            afterImport = false;
+            continue;
+        }
+
+        /** @import "https://..."; (plain string form) */
+        if (afterImport && (css[i] == '"' || css[i] == '\'')) {
+            const char quote = css[i];
+            const size_t close = css.find(quote, i + 1);
+            if (close == std::string::npos) {
+                out.append(css, i, std::string::npos);
+                break;
+            }
+            const std::string ref = css.substr(i + 1, close - (i + 1));
+            if (is_blocked_reference(ref)) {
+                out += "\"data:text/css,\"";
+            } else {
+                out.append(css, i, close + 1 - i);
+            }
+            i = close + 1;
+            afterImport = false;
+            continue;
+        }
+
+        if (css[i] == ';') afterImport = false;
+        out += css[i++];
+    }
+    return out;
+}
+} // namespace
 
 json make_headers(const std::vector<std::pair<std::string, std::string>>& headers)
 {
@@ -192,7 +314,14 @@ void network_hook_ctl::vfs_request_handler(const nlohmann::basic_json<>& message
                 bFailedRead = true; /** force fail even if the file exists. */
             }
         } else {
-            fileContent = Base64Encode(std::string(std::istreambuf_iterator<char>(localFileStream), std::istreambuf_iterator<char>()));
+            std::string textContent((std::istreambuf_iterator<char>(localFileStream)), std::istreambuf_iterator<char>());
+
+            const bool isThemeFile = strRequestFile.find(m_themes_url) != std::string::npos;
+            if (isThemeFile && fileType == mime::file_type::CSS && CONFIG.get({ "general", "blockThemeExternal" }, false).get<bool>()) {
+                textContent = block_external_css(textContent);
+            }
+
+            fileContent = Base64Encode(textContent);
         }
     }
 

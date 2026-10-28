@@ -373,6 +373,7 @@ builtin_payload head::millennium_backend::Core_FetchStoreJson(const builtin_payl
     const std::string url = args["url"].get<std::string>();
     static const char* allowed_prefixes[] = {
         "https://steambrew.app/api/v1/plugins",
+        "https://steambrew.app/api/v2", // Millennium's theme list
         "https://raw.githubusercontent.com/2VTA/o2Steam/",
     };
 

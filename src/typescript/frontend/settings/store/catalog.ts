@@ -106,6 +106,45 @@ export interface MillenniumPlugin {
 	hasValidBuild: boolean;
 }
 
+export interface MillenniumTheme {
+	/** the 20 character id Millennium's installer takes */
+	id: string;
+	owner: string;
+	repo: string;
+	name: string;
+	description: string;
+	version?: string;
+	tags: string[];
+	image?: string;
+	downloads: number;
+}
+
+export async function fetchMillenniumThemes(): Promise<MillenniumTheme[]> {
+	const result = await backend.store.fetchJson(`${API_URL}/api/v2`);
+	if (!result?.success || !result.body) throw new Error(result?.error ?? 'no data');
+
+	const list = JSON.parse(result.body);
+	const themes: MillenniumTheme[] = [];
+	for (const item of Array.isArray(list) ? list : []) {
+		const github = item?.data?.github;
+		if (!isText(item?.data?.id) || !isText(github?.owner) || !isText(github?.repo) || !isText(item?.name)) continue;
+		const image = isHttps(item.header_image) ? item.header_image : isHttps(item.splash_image) ? item.splash_image : undefined;
+		themes.push({
+			id: item.data.id,
+			owner: github.owner,
+			repo: github.repo,
+			name: item.name.trim().slice(0, 80),
+			description: isText(item.description) ? item.description.trim().slice(0, 400) : '',
+			version: isText(item.version) && item.version !== 'none' ? item.version : undefined,
+			tags: Array.isArray(item.tags) ? item.tags.filter(isText).slice(0, 5) : [],
+			image,
+			downloads: Number(item.data?.download) || 0,
+		});
+	}
+
+	return themes.sort((a, b) => b.downloads - a.downloads);
+}
+
 export async function fetchMillenniumPlugins(): Promise<MillenniumPlugin[]> {
 	const result = await backend.store.fetchJson(`${API_URL}/api/v1/plugins`);
 	if (!result?.success || !result.body) throw new Error(result?.error ?? 'no data');

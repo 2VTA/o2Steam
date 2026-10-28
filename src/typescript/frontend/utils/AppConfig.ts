@@ -34,6 +34,7 @@ export interface AppConfig {
 	general: {
 		injectJavascript: boolean;
 		injectCSS: boolean;
+		blockThemeExternal?: boolean;
 		checkForMillenniumUpdates: boolean;
 		checkForPluginAndThemeUpdates: boolean;
 		onMillenniumUpdate: OnMillenniumUpdate;

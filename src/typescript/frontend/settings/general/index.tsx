@@ -182,6 +182,12 @@ export const GeneralViewModal: React.FC = () => {
 				<Field label={locale.themePanelInjectCSS}>
 					<Toggle value={config.general.injectCSS} onChange={(e) => handleChange('injectCSS', e)} />
 				</Field>
+				<Field
+					label="Block external connections in themes"
+					description="Theme stylesheets can't load fonts or images from outside Steam (their @import / url() links are emptied). Theme scripts are not affected, and some themes may lose a font or picture. Restart Steam after changing it."
+				>
+					<Toggle value={!!config.general.blockThemeExternal} onChange={(e) => handleChange('blockThemeExternal', e)} />
+				</Field>
 
 				<RenderAccentColorPicker />
 			</DialogControlsSection>

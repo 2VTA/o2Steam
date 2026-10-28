@@ -10,13 +10,12 @@ import { Placeholder } from '../../components/Placeholder';
 import { settingsClasses } from '../../utils/classes';
 import { backend } from '../../utils/ffi';
 import { Installer, InstallType, waitForInstallerComplete } from '../general/Installer';
-import { showInstallThemeModal } from '../themes/ThemeInstallerModal';
-import { Catalog, CatalogPlugin, CatalogTheme, fetchMillenniumPlugins, fetchO2steamCatalog, MillenniumPlugin } from './catalog';
+import { themeSafety } from './theme-safety';
+import { Catalog, CatalogPlugin, CatalogTheme, fetchMillenniumPlugins, fetchMillenniumThemes, fetchO2steamCatalog, MillenniumPlugin, MillenniumTheme } from './catalog';
 
 type Source = 'o2steam' | 'millennium';
 type Kind = 'plugins' | 'themes';
 
-const MILLENNIUM_THEMES_HINT = 'The Millennium theme list is on its website. If you have a theme\'s ID, install it by ID here.';
 
 function confirm(title: string, description: string, okText: string): Promise<boolean> {
 	return new Promise((resolve) => {
@@ -54,6 +53,8 @@ export function StoreViewModal() {
 	const [o2FromBundle, setO2FromBundle] = useState(false);
 	const [millenniumPlugins, setMillenniumPlugins] = useState<MillenniumPlugin[] | undefined>(undefined);
 	const [millenniumError, setMillenniumError] = useState<string | undefined>(undefined);
+	const [millenniumThemes, setMillenniumThemes] = useState<MillenniumTheme[] | undefined>(undefined);
+	const [millenniumThemesError, setMillenniumThemesError] = useState<string | undefined>(undefined);
 
 	// plugin folder names / "owner/repo" of what is installed, and live progress by item key
 	const [installed, setInstalled] = useState<Record<string, boolean>>({});
@@ -99,6 +100,16 @@ export function StoreViewModal() {
 				);
 			})
 			.catch((e) => setMillenniumError(String(e?.message ?? e)));
+
+		fetchMillenniumThemes()
+			.then((list) => {
+				setMillenniumThemes(list);
+				refreshInstalled(
+					[],
+					list.map((t) => ({ owner: t.owner, repo: t.repo })),
+				);
+			})
+			.catch((e) => setMillenniumThemesError(String(e?.message ?? e)));
 	}, []);
 
 	const matches = (name: string, description: string) => {
@@ -158,6 +169,11 @@ export function StoreViewModal() {
 		);
 	};
 
+	const installMillenniumTheme = (theme: MillenniumTheme) => {
+		// Millennium's own install window (asks to confirm, shows progress, offers to use the theme)
+		new Installer().OpenInstallPrompt(theme.id, InstallType.Theme, () => refreshInstalled([], [{ owner: theme.owner, repo: theme.repo }]));
+	};
+
 	const installMillenniumPlugin = (plugin: MillenniumPlugin) => {
 		// Millennium's own install window (asks to confirm, shows progress, offers to enable the plugin)
 		new Installer().OpenInstallPrompt(plugin.id, InstallType.Plugin, () => refreshInstalled([plugin.pluginName], []));
@@ -168,6 +184,13 @@ export function StoreViewModal() {
 	const o2Plugins = useMemo(() => (o2Catalog?.plugins ?? []).filter((p) => matches(p.name, p.description)), [o2Catalog, search]);
 	const o2Themes = useMemo(() => (o2Catalog?.themes ?? []).filter((t) => matches(t.name, t.description)), [o2Catalog, search]);
 	const mPlugins = useMemo(() => (millenniumPlugins ?? []).filter((p) => matches(p.name, p.description)), [millenniumPlugins, search]);
+	// only themes that were safety-reviewed (and carry nothing executable) are shown
+	const reviewedThemes = useMemo(() => (millenniumThemes ?? []).filter((t) => {
+		const safety = themeSafety(t.owner, t.repo);
+		return safety !== undefined && safety.verdict !== 'blocked';
+	}), [millenniumThemes]);
+	const hiddenThemeCount = (millenniumThemes?.length ?? 0) - reviewedThemes.length;
+	const mThemes = useMemo(() => reviewedThemes.filter((t) => matches(t.name, t.description)), [reviewedThemes, search]);
 
 	const InstallButton = ({ itemKey, isInstalled, onClick }: { itemKey: string; isInstalled: boolean; onClick: () => void }) => {
 		const busy = progress[itemKey];
@@ -236,14 +259,39 @@ export function StoreViewModal() {
 					))
 				: emptyNote('No plugin matches your search.');
 		}
+	} else if (millenniumThemesError) {
+		body = emptyNote(`Could not load the Millennium theme list (${millenniumThemesError}). Try again in a moment.`);
+	} else if (!millenniumThemes) {
+		body = emptyNote('Loading the Millennium theme list...');
 	} else {
-		body = (
-			<Placeholder icon={<FaStore className="SVGIcon_Button" />} header="Millennium themes" body={MILLENNIUM_THEMES_HINT}>
-				<DialogButton className={joinClassNames(settingsClasses.SettingsDialogButton, 'MillenniumPlaceholder_Button')} onClick={() => showInstallThemeModal(() => {})}>
-					<FaStore />
-					Install a theme by ID
-				</DialogButton>
-			</Placeholder>
+		const safetyLine = (owner: string, repo: string) => {
+			const safety = themeSafety(owner, repo);
+			if (!safety) return '';
+			const base = safety.verdict === 'clean' ? 'Checked: no outside connections' : `Reaches outside Steam: ${safety.hosts.join(', ')}`;
+			return `\n${base}${safety.note ? `. ${safety.note}` : ''}`;
+		};
+
+		body = mThemes.length ? (
+			<>
+				<Field
+					label="Safety-checked themes"
+					description={`Every theme here was scanned for executables, scripts that call out, and outside links.${hiddenThemeCount > 0 ? ` ${hiddenThemeCount} theme${hiddenThemeCount === 1 ? ' is' : 's are'} hidden (not reviewed yet, or they ship an executable file).` : ''} Turn on "Block external connections in themes" in General to stop style files from loading anything outside Steam.`}
+					bottomSeparator="standard"
+				/>
+				{mThemes.map((t) => (
+					<Field
+						key={t.id}
+						icon={t.image ? <img src={t.image} style={{ width: 96, height: 54, objectFit: 'cover', borderRadius: 4 }} /> : undefined}
+						label={`${t.name}${t.version ? `  v${t.version}` : ''}`}
+						description={`${t.description}${t.tags.length ? `  [${t.tags.join(', ')}]` : ''}  (${formatCount(t.downloads)} downloads)${safetyLine(t.owner, t.repo)}`}
+						bottomSeparator="standard"
+					>
+						<InstallButton itemKey={`theme:${t.owner}/${t.repo}`} isInstalled={!!installed[`theme:${t.owner}/${t.repo}`]} onClick={() => installMillenniumTheme(t)} />
+					</Field>
+				))}
+			</>
+		) : (
+			emptyNote('No theme matches your search.')
 		);
 	}
 

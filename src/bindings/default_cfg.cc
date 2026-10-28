@@ -50,6 +50,7 @@ json head::get_default_config()
         { "general", {
             { "injectJavascript", true },
             { "injectCSS", true },
+            { "blockThemeExternal", false },
             { "checkForMillenniumUpdates", true },
             { "checkForPluginAndThemeUpdates", true },
             { "onMillenniumUpdate", static_cast<int>(updateBehavior) },
