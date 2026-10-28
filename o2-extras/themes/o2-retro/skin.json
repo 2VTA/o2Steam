@@ -2,7 +2,7 @@
 	"name": "o2 Retro Terminal",
 	"description": "A CRT terminal look for Steam: phosphor colours, scanlines and glow. Nothing is loaded from the internet.",
 	"author": "Ryder (o2cord)",
-	"version": "0.5.0",
+	"version": "1.0.0",
 	"tags": [
 		"Retro",
 		"Terminal",
@@ -127,43 +127,6 @@
 		}
 	],
 	"Conditions": {
-		"Phosphor tint": {
-			"description": "> How strongly the phosphor colour covers the screen. 100 is a pure one-colour screen; lower keeps more of Steam's own colours.",
-			"default": "55",
-			"slider": {
-				"min": 0,
-				"max": 100,
-				"step": 5,
-				"unit": "%",
-				"cssVariable": "--o2-tint"
-			}
-		},
-		"Colour shift": {
-			"description": "> How far Steam's own colours (the blue interface) are pulled toward the phosphor colour. 0 leaves them alone, 100 makes the interface one colour.",
-			"default": "35",
-			"slider": {
-				"min": 0,
-				"max": 100,
-				"step": 5,
-				"unit": "%",
-				"cssVariable": "--o2-hue"
-			}
-		},
-		"Colour mode": {
-			"description": "> Keep colours: Steam keeps its own colours with a phosphor tint over them.\n\n- Black and white: everything is turned grey first, so the screen is one colour like a real terminal.",
-			"default": "Keep colours",
-			"values": {
-				"Keep colours": {},
-				"Black and white": {
-					"TargetCss": {
-						"affects": [
-							".*"
-						],
-						"src": "profiles/mono.css"
-					}
-				}
-			}
-		},
 		"Phosphor colour": {
 			"description": "> The colour of the screen, like the profiles in cool-retro-term.\n\n- Amber / Green / Apple ][ / Red / Blue / Cyan / Plasma / VGA grey",
 			"default": "Amber",
@@ -234,6 +197,54 @@
 				}
 			}
 		},
+		"Restyle strength": {
+			"description": "> How much of Steam's own interface (panels, lists, text, buttons) is recoloured into the phosphor colour. Pictures keep their real colours. 100 = fully one colour, 0 = Steam's own colours. Applies to new windows; restart Steam to see it everywhere.",
+			"default": "85",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-restyle"
+			}
+		},
+		"Phosphor tint": {
+			"description": "> A phosphor-coloured film over the whole screen, pictures included. 0 leaves pictures and Steam's colours as they are.",
+			"default": "0",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-tint"
+			}
+		},
+		"Colour shift": {
+			"description": "> Pulls every colour on screen, pictures included, toward the phosphor colour. 0 leaves colours alone.",
+			"default": "0",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-hue"
+			}
+		},
+		"Colour mode": {
+			"description": "> Keep colours: Steam keeps its own colours with a phosphor tint over them.\n\n- Black and white: everything is turned grey first, so the screen is one colour like a real terminal.",
+			"default": "Keep colours",
+			"values": {
+				"Keep colours": {},
+				"Black and white": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/mono.css"
+					}
+				}
+			}
+		},
 		"Scanlines": {
 			"description": "> How visible the scanlines are.",
 			"default": "Normal",
@@ -287,5 +298,27 @@
 				}
 			}
 		}
+	},
+	"o2Restyle": {
+		"fg": {
+			"condition": "Phosphor colour",
+			"default": "Amber",
+			"values": {
+				"Amber": "#ff8100",
+				"Green": "#0ccc68",
+				"Apple ][": "#4dff6b",
+				"Red": "#ff3b30",
+				"Blue": "#7fb4ff",
+				"Cyan": "#52f7ff",
+				"Plasma": "#ff9bd6",
+				"VGA grey": "#c0c0c0"
+			}
+		},
+		"strength": {
+			"condition": "Restyle strength",
+			"default": 85
+		},
+		"square": true,
+		"noShadows": true
 	}
 }

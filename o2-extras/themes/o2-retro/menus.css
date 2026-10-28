@@ -1,8 +1,11 @@
 /*
- * o2 Retro Terminal - menus (right-click menus, the Steam/Friends/Games/View/Help menus, the top-bar pop-ups).
- * Black boxes with a white frame; the row under the mouse is inverted. As in terminal.css the colours are only
- * black and white so the phosphor layer from retro.css turns them into the chosen colour.
+ * o2 Retro Terminal - menus (right-click menus, the Steam / Friends / Games / View / Help menus, the top-bar
+ * pop-ups): black boxes with a phosphor frame, upper-case items, the row under the mouse inverted.
  */
+
+:where(:root) {
+	--o2-dim: color-mix(in srgb, var(--o2-fg) 55%, #000);
+}
 
 html,
 body {
@@ -10,22 +13,22 @@ body {
 }
 
 body {
-	border: 1px solid #fff !important;
+	border: 1px solid var(--o2-fg) !important;
 	box-sizing: border-box;
 }
 
 body * {
 	background-color: #000 !important;
 	background-image: none !important;
-	color: #fff !important;
-	border-color: #fff !important;
+	color: var(--o2-fg) !important;
+	border-color: var(--o2-dim) !important;
 	box-shadow: none !important;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
 }
 
 body *:hover {
-	background-color: #fff !important;
+	background-color: var(--o2-fg) !important;
 	color: #000 !important;
 	text-shadow: none !important;
 }
@@ -34,13 +37,5 @@ body *:hover * {
 	color: #000 !important;
 	background-color: transparent !important;
 	text-shadow: none !important;
-}
-
-body svg,
-body img {
-	filter: none;
-}
-
-body *:hover svg {
-	filter: invert(1);
+	fill: #000 !important;
 }

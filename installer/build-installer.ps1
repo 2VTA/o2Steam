@@ -22,6 +22,17 @@ foreach ($entry in $files.GetEnumerator()) {
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
     Copy-Item (Join-Path $Build $entry.Value) $dest
 }
+# the o2 Retro Terminal theme and the o2steam plugins (kept in ..\o2-extras) go in under extras/
+$extras = Join-Path (Split-Path -Parent $Here) "o2-extras"
+foreach ($theme in Get-ChildItem (Join-Path $extras "themes") -Directory) {
+    Copy-Item $theme.FullName (Join-Path $stage "extras/themes/$($theme.Name)") -Recurse
+}
+foreach ($plugin in Get-ChildItem (Join-Path $extras "plugins") -Directory) {
+    $target = Join-Path $stage "extras\plugins\$($plugin.Name)"
+    New-Item -ItemType Directory -Force -Path (Join-Path $target ".millennium\Dist") | Out-Null
+    Copy-Item (Join-Path $plugin.FullName "plugin.json") $target
+    Copy-Item (Join-Path $plugin.FullName ".millennium\Dist\*") (Join-Path $target ".millennium\Dist")
+}
 New-Item -ItemType Directory -Force -Path (Join-Path $Here "payload") | Out-Null
 $zip = Join-Path $Here "payload\o2steam.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }

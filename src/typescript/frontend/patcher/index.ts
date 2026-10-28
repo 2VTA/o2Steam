@@ -5,6 +5,7 @@ import { EvaluateConditions } from './v2/Conditions';
 import { PatchV1, EvaluateStatements } from './v1/Conditions';
 import { PatchRootMenu } from '../utils/root-menu';
 import { SteamLocale } from '../utils/localization-manager';
+import { applyO2Restyle } from './o2Restyle';
 
 const EvaluateModule = (module: string, type: ModuleType, document: Document) => {
 	const activeTheme: ThemeItem = pluginSelf.activeTheme;
@@ -150,6 +151,9 @@ export function patchDocumentContext(windowContext: any) {
 
 	/** Inject root colors */
 	pluginSelf?.RootColors && DOMModifier.AddStyleSheetFromText(document, pluginSelf.RootColors, 'RootColors');
+
+	/** o2steam: recolour Steam's own stylesheets when the theme asks for it */
+	applyO2Restyle(document);
 }
 
 export function patchMissedDocuments() {

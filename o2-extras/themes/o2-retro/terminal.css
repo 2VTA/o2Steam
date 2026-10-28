@@ -1,30 +1,42 @@
 /*
- * o2 Retro Terminal - "Full terminal" style: flat, square, boxed, like a text-mode screen.
+ * o2 Retro Terminal - the layout: flat black panels, phosphor frames, inverted selections, bracketed tabs,
+ * a "> PLAY" block button. Steam's readable class names are used (o2steam adds them next to the hashed
+ * ones), the same way other Millennium themes do it.
  *
- * Colours here are only ever black, white and grey on purpose: retro.css multiplies the whole screen by
- * the phosphor colour, so white becomes the phosphor colour and the borders/hovers follow the profile.
- * Only class names Steam keeps readable are used (DialogButton, DialogInput...), plus the classic web classes.
+ * Colours come from the phosphor profile:
+ *   --o2-fg     full phosphor        --o2-dim    phosphor at ~55%
+ *   --o2-faint  phosphor at ~22%     --o2-panel  near-black panel tint
  */
 
-/* ---- everything flat and square ------------------------------------------------------------ */
+:where(:root) {
+	--o2-dim: color-mix(in srgb, var(--o2-fg) 55%, #000);
+	--o2-faint: color-mix(in srgb, var(--o2-fg) 22%, #000);
+	--o2-panel: color-mix(in srgb, var(--o2-fg) 6%, #000);
+	--o2-black: #000;
+}
+
+/* ================================================================ everywhere */
+
 * {
 	border-radius: 0 !important;
 	box-shadow: none !important;
-}
-
-/* ---- scrollbars ---------------------------------------------------------------------------- */
-* {
 	scrollbar-width: thin;
-	scrollbar-color: #fff #000 !important;
+	scrollbar-color: var(--o2-dim) var(--o2-black) !important;
 }
 
-/* ---- buttons (Steam client) ---------------------------------------------------------------- */
+::selection {
+	background: var(--o2-fg);
+	color: var(--o2-black);
+	text-shadow: none;
+}
+
+/* ---- buttons --------------------------------------------------------------------------------- */
 .DialogButton,
 .DialogButton._DialogLayout {
-	background: #000 !important;
+	background: var(--o2-black) !important;
 	background-image: none !important;
-	border: 1px solid #fff !important;
-	color: #fff !important;
+	border: 1px solid var(--o2-dim) !important;
+	color: var(--o2-fg) !important;
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
 }
@@ -32,13 +44,14 @@
 .DialogButton:hover,
 .DialogButton.gpfocus,
 .DialogButton:focus-visible {
-	background: #fff !important;
-	color: #000 !important;
+	background: var(--o2-fg) !important;
+	border-color: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
 	text-shadow: none !important;
 }
 
 .DialogButton.Primary {
-	border-width: 2px !important;
+	border-color: var(--o2-fg) !important;
 }
 
 .DialogButton.Destructive {
@@ -50,26 +63,40 @@
 	opacity: 0.4;
 }
 
-/* ---- inputs and dropdowns ------------------------------------------------------------------ */
+/* ---- inputs and dropdowns -------------------------------------------------------------------- */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 textarea,
 select,
 .DialogInput,
 .DialogTextInputBase,
 .DialogDropDown {
-	background: #000 !important;
+	background: var(--o2-black) !important;
 	background-image: none !important;
-	border: 1px solid #fff !important;
-	color: #fff !important;
-	caret-color: #fff;
+	border: 1px solid var(--o2-dim) !important;
+	color: var(--o2-fg) !important;
+	caret-color: var(--o2-fg);
+}
+
+input:focus,
+textarea:focus,
+.DialogInput:focus {
+	border-color: var(--o2-fg) !important;
+	outline: none !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-	color: #aaa !important;
+	color: var(--o2-dim) !important;
 }
 
-/* ---- dialogs and headers ------------------------------------------------------------------- */
+/* ---- dialogs ---------------------------------------------------------------------------------- */
+.ModalDialogPopup,
+.ModalPosition_Content,
+.DialogContent {
+	background: var(--o2-black) !important;
+	border: 1px solid var(--o2-fg) !important;
+}
+
 .DialogHeader,
 .DialogControlsSectionHeader,
 h1,
@@ -79,39 +106,397 @@ h2 {
 }
 
 .DialogHeader {
-	border-bottom: 1px solid #fff;
+	border-bottom: 1px solid var(--o2-dim);
 }
 
 .DialogControlsSectionHeader {
-	border-bottom: 1px dashed #fff;
+	border-bottom: 1px dashed var(--o2-faint);
 }
 
-.ModalDialogPopup {
-	border: 1px solid #fff !important;
-}
+/* ================================================================ Steam client: frame */
 
-/* ---- Steam web pages: buttons, menus, header ------------------------------------------------ */
-body {
-	background-color: #000 !important;
+/* ---- title bar + tabs ------------------------------------------------------------------------- */
+.TopBar,
+.TitleBar,
+.SuperNavBar,
+.URLBar {
+	background: var(--o2-black) !important;
 	background-image: none !important;
+}
+
+.TopBar {
+	border-bottom: 1px solid var(--o2-dim);
+}
+
+.RootMenuButton,
+.SuperNavMenu .MenuButton {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+.SuperNavMenu .MenuButton {
+	color: var(--o2-dim) !important;
+	padding: 0 2px;
+}
+
+.SuperNavMenu .MenuButton::before {
+	content: "[ ";
+}
+
+.SuperNavMenu .MenuButton::after {
+	content: " ]";
+}
+
+.SuperNavMenu:hover .MenuButton {
+	color: var(--o2-fg) !important;
+}
+
+.SuperNavMenu.Selected .MenuButton {
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
+	text-shadow: none !important;
+	border-bottom: none !important;
+}
+
+/* the underline Steam draws under the selected tab */
+.SuperNavMenu.Selected::after,
+.SuperNavMenu .MenuButton.Selected::after {
+	display: none !important;
+}
+
+/* ---- account box and top-right buttons --------------------------------------------------------- */
+.AccountMenu {
+	background: var(--o2-black) !important;
+	border: 1px solid var(--o2-dim) !important;
+	color: var(--o2-fg) !important;
+}
+
+.AccountMenu:hover {
+	border-color: var(--o2-fg) !important;
+}
+
+.AccountMenu .avatar,
+.avatarHolder img {
+	border-radius: 0 !important;
+	outline: 1px solid var(--o2-dim);
+}
+
+.TitleBarControls .Button {
+	background: var(--o2-black) !important;
+	border: 1px solid var(--o2-faint) !important;
+	color: var(--o2-fg) !important;
+}
+
+.TitleBarControls .Button:hover {
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
+}
+
+.windowControlButton:hover {
+	background: var(--o2-fg) !important;
+}
+
+.windowControlButton:hover svg {
+	color: var(--o2-black) !important;
+	fill: var(--o2-black) !important;
+}
+
+/* ---- bottom bar ------------------------------------------------------------------------------- */
+.BottomBar {
+	background: var(--o2-black) !important;
+	border-top: 1px solid var(--o2-dim);
+}
+
+.BottomBar .AddGameButton,
+.BottomBar .FriendsButton,
+.BottomBar .DownloadStatusContent {
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--o2-dim) !important;
+}
+
+.BottomBar .AddGameButton:hover,
+.BottomBar .FriendsButton:hover,
+.BottomBar .DownloadStatusContent:hover {
+	color: var(--o2-fg) !important;
+	background: var(--o2-panel) !important;
+}
+
+.BottomBarContainer .Alert {
+	background: var(--o2-panel) !important;
+	border-top: 1px solid var(--o2-fg);
+	color: var(--o2-fg) !important;
+}
+
+.BottomBarContainer .AlertButton {
+	background: var(--o2-black) !important;
+	border: 1px solid var(--o2-fg);
+}
+
+/* ================================================================ library */
+
+/* ---- left list ------------------------------------------------------------------------------- */
+.LeftListSizableContainer,
+.GameListHomeAndSearch {
+	background: var(--o2-black) !important;
+	background-image: none !important;
+}
+
+.LeftListSizableContainer {
+	border-right: 1px solid var(--o2-faint);
+}
+
+.HomeBox,
+.CollectionButton,
+.SearchBar .MenuHeader,
+.GameListHomeAndSearch .Container {
+	background: var(--o2-black) !important;
+	border: 1px solid var(--o2-faint) !important;
+}
+
+.HomeBox.Selected,
+.HomeBox:hover,
+.CollectionButton:hover {
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
+}
+
+.HomeBox.Selected *,
+.HomeBox:hover * {
+	color: var(--o2-black) !important;
+	fill: var(--o2-black) !important;
+}
+
+.SectionHeaderContent .SectionName {
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--o2-dim) !important;
+}
+
+.SectionHeaderContent .SectionName::before {
+	content: "// ";
+}
+
+.SectionHeaderContent .SectionRule {
+	border-top: 1px dashed var(--o2-faint) !important;
+	background: none !important;
+	height: 0 !important;
+}
+
+.GameListEntryContainer {
+	border-left: 2px solid transparent;
+}
+
+.GameListEntryName {
+	color: var(--o2-dim) !important;
+}
+
+.Installed .GameListEntryName {
+	color: var(--o2-fg) !important;
+}
+
+.Focusable:hover > .GameListEntryContainer {
+	background: var(--o2-panel) !important;
+	border-left-color: var(--o2-dim);
+}
+
+.Selected > .GameListEntryContainer,
+.Selected.Focusable {
+	background: var(--o2-fg) !important;
+}
+
+.Selected > .GameListEntryContainer .GameListEntryName,
+.Selected > .GameListEntryContainer .DownloadProgress,
+.Selected > .GameListEntryContainer * {
+	color: var(--o2-black) !important;
+	text-shadow: none !important;
+}
+
+.Running .GameListEntryName::after {
+	content: " _";
+	animation: o2-cursor 1s steps(1, end) infinite;
+}
+
+@keyframes o2-cursor {
+	50% {
+		opacity: 0;
+	}
+}
+
+/* ---- library home ------------------------------------------------------------------------------ */
+.ShowcaseHeader,
+.HeaderPageControls {
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	border-bottom: 1px dashed var(--o2-faint);
+}
+
+.LibraryItemBoxShine {
+	display: none !important;
+}
+
+.LibraryItemBox {
+	outline: 1px solid var(--o2-faint);
+	outline-offset: 1px;
+}
+
+.LibraryItemBox:hover,
+.LibraryItemBox.gpfocus {
+	outline: 2px solid var(--o2-fg);
+	transform: none !important;
+}
+
+.PartnerEventRowCapsule_Container {
+	outline: 1px solid var(--o2-faint);
+}
+
+.PartnerEventRowCapsule_Container:hover {
+	outline: 2px solid var(--o2-fg);
+}
+
+.PartnerEventRowCapsule_TextTitle {
+	color: var(--o2-fg) !important;
+}
+
+/* ---- game page --------------------------------------------------------------------------------- */
+.AppDetailsTransitionGroup,
+.AppDetailsMain,
+.Body.ScrollContainer {
+	background: var(--o2-black) !important;
+}
+
+.PlayBar,
+.PlayBar.Glassy {
+	background: var(--o2-black) !important;
+	background-image: none !important;
+	border-top: 1px solid var(--o2-dim);
+	border-bottom: 1px solid var(--o2-dim);
+	backdrop-filter: none !important;
+}
+
+.PlayButton,
+.PlayButton.ButtonChild {
+	background: var(--o2-fg) !important;
+	background-image: none !important;
+	color: var(--o2-black) !important;
+	text-shadow: none !important;
+}
+
+.PlayButton .ButtonText {
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	font-weight: 700;
+}
+
+.PlayButton .ButtonText::before {
+	content: "> ";
+}
+
+.PlayButton svg {
+	color: var(--o2-black) !important;
+	fill: var(--o2-black) !important;
+}
+
+.PlayButton:hover {
+	filter: brightness(1.15);
+}
+
+.StreamingSelector {
+	background: var(--o2-dim) !important;
+	background-image: none !important;
+}
+
+.PlayBarLabel {
+	text-transform: uppercase;
+	color: var(--o2-dim) !important;
+}
+
+.PlayBarDetailLabel,
+.PlayBarGameName {
+	color: var(--o2-fg) !important;
+}
+
+.AppButtonsContainer .MenuButton {
+	background: var(--o2-black) !important;
+	border: 1px solid var(--o2-dim) !important;
+}
+
+.AppButtonsContainer .MenuButton:hover {
+	background: var(--o2-fg) !important;
+}
+
+.AppButtonsContainer .MenuButton:hover svg {
+	fill: var(--o2-black) !important;
+	color: var(--o2-black) !important;
+}
+
+.BackdropGlass,
+.StickyHeaderShadow {
+	display: none !important;
+}
+
+.AppDetailsSectionContainer,
+.ReviewContainer,
+.RatingContainer,
+.GamePlaySummaryContainer,
+.InnerContainer > .Description,
+.LinkInner {
+	background: var(--o2-panel) !important;
+	background-image: none !important;
+	border: 1px dashed var(--o2-faint) !important;
+}
+
+.SectionHeader,
+.LabelText,
+.GamePlaySummaryHeader,
+.SubsectionHeader {
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--o2-fg) !important;
+}
+
+.SectionHeader::before,
+.GamePlaySummaryHeader::before {
+	content: "> ";
+}
+
+.ReviewThumbButton {
+	background: var(--o2-black) !important;
+	border: 1px solid var(--o2-dim) !important;
+}
+
+.ReviewThumbButton:hover {
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
+}
+
+.Links .Link:hover,
+.LinkInner:hover {
+	background: var(--o2-fg) !important;
+}
+
+.Links .Link:hover .Text,
+.LinkInner:hover .Text {
+	color: var(--o2-black) !important;
+}
+
+.DetailsProgressContainer {
+	background: var(--o2-faint) !important;
+}
+
+/* ================================================================ Steam web pages (store, community) */
+
+body {
+	background-color: var(--o2-black) !important;
 }
 
 [class*="btn_"],
-.btn_medium,
-.btn_small,
-.btn_green_steamui,
-.btn_blue_steamui,
-.btn_grey_steamui,
-.btn_green_white_innerfade,
-.btn_darkblue_white_innerfade,
-.btn_grey_black,
-.btn_profile_action,
 .pulldown,
 .popup_menu_btn {
-	background: #000 !important;
+	background: var(--o2-black) !important;
 	background-image: none !important;
-	border: 1px solid #fff !important;
-	color: #fff !important;
+	border: 1px solid var(--o2-dim) !important;
+	color: var(--o2-fg) !important;
 	text-transform: uppercase;
 }
 
@@ -125,8 +510,8 @@ body {
 [class*="btn_"]:hover,
 .pulldown:hover,
 .popup_menu_btn:hover {
-	background: #fff !important;
-	color: #000 !important;
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
 	text-shadow: none !important;
 }
 
@@ -136,28 +521,54 @@ body {
 .dropdown_menu,
 .newmodal,
 .newmodal_content,
-.store_nav .popup_menu,
 #global_header,
-.store_nav_area {
-	background: #000 !important;
+#store_nav_area .store_nav_bg,
+.store_nav_bg {
+	background: var(--o2-black) !important;
 	background-image: none !important;
-	border: 1px solid #fff !important;
+	border: 1px solid var(--o2-dim) !important;
 }
 
-.popup_menu_item,
-.popup_menu .popup_menu_item {
-	background: #000 !important;
-	color: #fff !important;
+.popup_menu_item {
+	background: var(--o2-black) !important;
+	color: var(--o2-fg) !important;
 }
 
-.popup_menu_item:hover,
-.popup_menu .popup_menu_item:hover {
-	background: #fff !important;
-	color: #000 !important;
+.popup_menu_item:hover {
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
 	text-shadow: none !important;
 }
 
-/* a selected-text block caret feel: links get a plain underline instead of colour only */
+.store_nav .tab,
+#global_header .menuitem {
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--o2-fg) !important;
+	background: none !important;
+}
+
+.store_nav .tab:hover,
+#global_header .menuitem:hover {
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
+}
+
+.home_area_spotlight,
+.tab_item,
+.store_capsule,
+.game_area_purchase_game,
+.block,
+.profile_customization,
+.inventory_page_left,
+.inventory_page_right,
+.friend_block_v2,
+.market_listing_row {
+	background-color: var(--o2-panel) !important;
+	background-image: none !important;
+	border: 1px solid var(--o2-faint) !important;
+}
+
 a:hover {
 	text-decoration: underline;
 }

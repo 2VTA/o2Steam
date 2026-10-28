@@ -36,7 +36,7 @@ record InstallManifest(string Version, string InstalledAt, string BackupDir, Lis
 
 sealed class InstallerForm : Form
 {
-    private const string Version = "0.1.0";
+    private const string Version = "0.2.0";
     private const string ManifestName = "o2steam-install.json";
 
     private static readonly PayloadFile[] Payload =
@@ -238,10 +238,20 @@ sealed class InstallerForm : Form
                  && new FileInfo(Path.Combine(folder, "wsock32.dll")).Length > 1000;
         Console.WriteLine("install ok: " + ok);
 
+        var extrasOk = File.Exists(Path.Combine(folder, "millennium", "themes", "o2-retro", "skin.json"))
+                       && File.ReadAllText(Path.Combine(folder, "millennium", "themes", "o2-retro", "skin.json")).Contains("o2Restyle")
+                       && File.Exists(Path.Combine(folder, "millennium", "plugins", "o2-avatars", "plugin.json"))
+                       && File.Exists(Path.Combine(folder, "millennium", "plugins", "o2-trade-stack", ".millennium", "Dist", "webkit.js"));
+        var cfgText = File.ReadAllText(Path.Combine(folder, "millennium", "config", "config.json"));
+        extrasOk = extrasOk && cfgText.Contains("o2-avatars") && cfgText.Contains("o2-trade-stack") && cfgText.Contains("\"activeTheme\": \"o2-retro\"");
+        Console.WriteLine("extras ok: " + extrasOk);
+        ok = ok && extrasOk;
+
         await Uninstall();
         var restored = File.ReadAllText(Path.Combine(folder, "wsock32.dll")) == "ORIGINAL-wsock32"
                        && !File.Exists(Path.Combine(folder, "millennium", "lib", "millennium.dll"))
-                       && !File.Exists(ManifestPath);
+                       && !File.Exists(ManifestPath)
+                       && !File.Exists(Path.Combine(folder, "millennium", "themes", "o2-retro", "skin.json"));
         Console.WriteLine("uninstall restored original: " + restored);
         return ok && restored ? 0 : 1;
     }
@@ -297,12 +307,68 @@ sealed class InstallerForm : Form
             Write("Installed " + file.DestRelative);
         }
 
+        // the o2 Retro Terminal theme and the o2steam plugins ride along in the payload under extras/
+        // (extras/themes/<name>/... and extras/plugins/<name>/...) and land in the millennium folder of Steam
+        foreach (var entry in zip.Entries)
+        {
+            var name = entry.FullName.Replace("\\", "/");
+            if (!name.StartsWith("extras/") || name.EndsWith("/")) continue;
+
+            var rel = Path.Combine("millennium", name.Substring("extras/".Length).Replace('/', Path.DirectorySeparatorChar));
+            var dest = Path.Combine(Root, rel);
+            Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
+
+            if (File.Exists(dest))
+            {
+                var backup = Path.Combine(backupDir, rel);
+                Directory.CreateDirectory(Path.GetDirectoryName(backup)!);
+                File.Copy(dest, backup, overwrite: true);
+            }
+
+            entry.ExtractToFile(dest, overwrite: true);
+            installed.Add(rel);
+        }
+        Write("Installed the o2 Retro Terminal theme and the o2steam plugins.");
+        EnableExtras();
+
         var manifest = new InstallManifest(Version, DateTime.Now.ToString("s"), Directory.Exists(backupDir) ? backupDir : "", installed);
         File.WriteAllText(ManifestPath, JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true }));
         Write("Done. Start Steam - o2steam loads with it.");
 
         if (!silent && MessageBox.Show(this, "o2steam is installed. Start Steam now?", "o2steam", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             Process.Start(new ProcessStartInfo(Path.Combine(Root, "steam.exe")) { UseShellExecute = true });
+    }
+
+    // Turns the bundled plugins on and, when the user has no theme chosen, picks the bundled one.
+    // Anything the user already chose is left as it is.
+    private void EnableExtras()
+    {
+        try
+        {
+            var path = Path.Combine(Root, "millennium", "config", "config.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            var root = File.Exists(path) ? System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(path)) as System.Text.Json.Nodes.JsonObject : null;
+            root ??= new System.Text.Json.Nodes.JsonObject();
+
+            var plugins = root["plugins"] as System.Text.Json.Nodes.JsonObject ?? new System.Text.Json.Nodes.JsonObject();
+            var enabled = plugins["enabledPlugins"] as System.Text.Json.Nodes.JsonArray ?? new System.Text.Json.Nodes.JsonArray();
+            foreach (var name in new[] { "o2-avatars", "o2-trade-stack" })
+                if (!enabled.Any(n => n?.GetValue<string>() == name)) enabled.Add(name);
+            plugins["enabledPlugins"] = enabled;
+            root["plugins"] = plugins;
+
+            var themes = root["themes"] as System.Text.Json.Nodes.JsonObject ?? new System.Text.Json.Nodes.JsonObject();
+            var active = themes["activeTheme"]?.GetValue<string>();
+            if (string.IsNullOrEmpty(active) || active == "default") themes["activeTheme"] = "o2-retro";
+            root["themes"] = themes;
+
+            File.WriteAllText(path, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+            Write("Turned on the o2steam plugins" + (themes["activeTheme"]?.GetValue<string>() == "o2-retro" ? " and the o2 Retro Terminal theme." : "."));
+        }
+        catch (Exception e)
+        {
+            Write("Could not update the settings (turn the plugins on from Plugins in o2steam): " + e.Message);
+        }
     }
 
     private async Task Uninstall()
