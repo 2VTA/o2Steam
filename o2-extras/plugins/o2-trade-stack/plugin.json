@@ -1,0 +1,8 @@
+{
+	"name": "o2-trade-stack",
+	"common_name": "o2steam Trade Stacks",
+	"description": "Trade offers: identical items (keys, metal, cases...) stack into one tile with a count, and you pick how many to add.",
+	"version": "0.1.0",
+	"useBackend": false,
+	"frontend": "frontend"
+}

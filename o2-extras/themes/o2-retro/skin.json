@@ -1,0 +1,208 @@
+{
+	"name": "o2 Retro Terminal",
+	"description": "A CRT terminal look for Steam: phosphor colours, scanlines and glow. Nothing is loaded from the internet.",
+	"author": "Ryder (o2cord)",
+	"version": "0.1.0",
+	"tags": [
+		"Retro",
+		"Terminal",
+		"CRT",
+		"Dark"
+	],
+	"UseDefaultPatches": false,
+	"Patches": [
+		{
+			"MatchRegexString": "^Steam$",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^OverlayBrowser_Browser$",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^SP Overlay:",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "Menu$",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "Supernav$",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^notificationtoasts_",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^SteamBrowser_Find$",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^OverlayTab\\d+_Find$",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^Steam Big Picture Mode$",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^QuickAccess_",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^MainMenu_",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": ".friendsui-container",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": ".ModalDialogPopup",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": ".FullModalOverlay",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^https://store\\.steampowered\\.com",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^https://steamcommunity\\.com",
+			"TargetCss": "retro.css"
+		},
+		{
+			"MatchRegexString": "^https://help\\.steampowered\\.com",
+			"TargetCss": "retro.css"
+		}
+	],
+	"Conditions": {
+		"Phosphor colour": {
+			"description": "> The colour of the screen, like the profiles in cool-retro-term.\n\n- Amber / Green / Apple ][ / Red / Blue / Cyan / Plasma / VGA grey",
+			"default": "Amber",
+			"values": {
+				"Amber": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/amber.css"
+					}
+				},
+				"Green": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/green.css"
+					}
+				},
+				"Apple ][": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/apple.css"
+					}
+				},
+				"Red": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/red.css"
+					}
+				},
+				"Blue": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/blue.css"
+					}
+				},
+				"Cyan": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/cyan.css"
+					}
+				},
+				"Plasma": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/plasma.css"
+					}
+				},
+				"VGA grey": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/vga.css"
+					}
+				}
+			}
+		},
+		"Scanlines": {
+			"description": "> How visible the scanlines are.",
+			"default": "Normal",
+			"values": {
+				"Off": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/no-scanlines.css"
+					}
+				},
+				"Normal": {},
+				"Strong": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/strong-scanlines.css"
+					}
+				}
+			}
+		},
+		"Text glow": {
+			"description": "> The soft glow around text.",
+			"default": "On",
+			"values": {
+				"On": {},
+				"Off": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/no-glow.css"
+					}
+				}
+			}
+		},
+		"Flicker": {
+			"description": "> A slow screen flicker. Stops if Windows has reduced motion turned on.",
+			"default": "Off",
+			"values": {
+				"Off": {},
+				"On": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/flicker.css"
+					}
+				}
+			}
+		}
+	}
+}
