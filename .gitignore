@@ -1,0 +1,41 @@
+# Build files
+**/build
+src/typescript/.build-cache.json
+src/typescript/.frontend.bin
+
+# Node
+node_modules/
+
+# Incremental TypeScript build cache
+src/typescript/.build-cache.json
+src/typescript/.frontend.bin*
+
+# Visual Studio & Visual Studio Code
+.vs*/
+
+# Zed Editor
+.zed/
+
+# Jetbrains IDEs
+.idea/
+
+# Clangd C++ index files
+.cache/
+src/include/millennium/virtfs.h
+
+scripts/resources.rc
+scripts/RC*
+
+# macOS system files
+**/.DS_Store
+
+# Starlight: artifacts built by build.rs
+starlight/npm/bin/*.zip
+starlight/target-types/
+
+# Nix build files
+**/result
+__cmake_systeminformation/
+target/
+starlight/npm/bin/millennium/types/
+starlight/npm/binaries/

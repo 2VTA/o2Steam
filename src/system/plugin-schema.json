@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "common_name": {
+      "type": "string",
+      "markdownDescription": "The common name that appears for your plugin in Settings -> Plugins -> Your plugin"
+    },
+    "name": {
+      "type": "string",
+      "markdownDescription": "The internal name of your plugin, make sure its unique as its VERY important and CANNOT shadow other plugin names"
+    },
+    "description": {
+      "type": "string",
+      "markdownDescription": "A description for your plugin."
+    },
+    "useBackend": {
+      "type": "boolean",
+      "markdownDescription": "Whether or not your plugin uses the backend. If you set this to true, you must provide a `backend` folder (or set a custom backend directory) in your plugin directory."
+    },
+    "backend": {
+      "type": "string",
+      "markdownDescription": "The relative path to the backend directory. If not provided, the default folder is `backend`."
+    },
+    "frontend": {
+      "type": "string",
+      "markdownDescription": "The relative path to the frontend directory. If not provided, the default folder is `frontend`."
+    },
+    "thumbnail": {
+      "type": "string",
+      "markdownDescription": "An absolute path to an image resource, usually hosted on Imgur or GitHub's raw CDN. The image should be 16:9 and a minimum size of 512x288 pixels."
+    },
+    "splash_image": {
+      "type": "string",
+      "markdownDescription": "An absolute path to an image resource, usually hosted on Imgur or GitHub's raw CDN. This image is displayed as a backdrop when viewing your plugin page online. The image should be 16:9 and a minimum size of 1920x1080 pixels."
+    },
+    "version": {
+      "type": "string",
+      "markdownDescription": "The version of your plugin."
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "markdownDescription": "A list of relative paths for the plugin builder to include in your plugin distribution."
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

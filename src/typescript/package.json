@@ -1,0 +1,9 @@
+{
+  "workspaces": [
+    "ttc",
+    "sdk",
+    "frontend",
+    "tests/harness",
+    "tests/ffi"
+  ]
+}
