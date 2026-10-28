@@ -424,9 +424,10 @@ h2 {
 	content: "> ";
 }
 
-.PlayButton svg {
-	color: var(--o2-black) !important;
-	fill: var(--o2-black) !important;
+/* the button reads "> PLAY" - Steam's own play/stop icon would make it "▶ > PLAY" */
+.PlayButton > svg,
+.PlayButton .SVGIcon_Button {
+	display: none !important;
 }
 
 .PlayButton:hover {
@@ -462,9 +463,16 @@ h2 {
 	color: var(--o2-black) !important;
 }
 
-.BackdropGlass,
 .StickyHeaderShadow {
 	display: none !important;
+}
+
+/* the game's picture must not show through under the play bar / links row */
+.AppDetailsOverviewPanel .Backdrop,
+.BackdropGlass {
+	background: var(--o2-black) !important;
+	background-image: none !important;
+	backdrop-filter: none !important;
 }
 
 .AppDetailsSectionContainer,
