@@ -35,6 +35,7 @@ import { settingsClasses } from '../utils/classes';
 import { GeneralViewModal } from './general';
 import { ThemeViewModal } from './themes';
 import { PluginViewModal } from './plugins';
+import { StoreViewModal } from './store';
 import { UpdatesViewModal } from './updates';
 import { UpdateContextProvider } from './updates/useUpdateContext';
 import { RenderLogViewer } from './logs';
@@ -43,7 +44,7 @@ import Styles from '../utils/styles';
 import { QuickCssViewModal } from './quickcss';
 import { useQuickAccessStore } from '../quick-access/quickAccessStore';
 import { MillenniumIcons } from '../components/Icons';
-import { FaPaintRoller } from 'react-icons/fa';
+import { FaPaintRoller, FaStore } from 'react-icons/fa';
 import { PiPlugsFill } from 'react-icons/pi';
 
 declare global {
@@ -128,6 +129,18 @@ export function MillenniumSettings() {
 		route: '/millennium/settings/plugins',
 	};
 
+	const tabSpotStore: SidebarNavigationPage = {
+		visible: true,
+		title: 'Store',
+		icon: <FaStore style={{ height: '20px', width: '20px' }} />,
+		content: (
+			<DialogBody className={Classes.SettingsDialogBodyFade}>
+				<StoreViewModal />
+			</DialogBody>
+		),
+		route: '/millennium/settings/store',
+	};
+
 	const tabSpotUpdates: SidebarNavigationPage = {
 		visible: true,
 		title: locale.settingsPanelUpdates,
@@ -158,6 +171,7 @@ export function MillenniumSettings() {
 		tabSpotThemes,
 		tabSpotQuickCSS,
 		tabSpotPlugins,
+		tabSpotStore,
 		'separator',
 		tabSpotUpdates,
 		tabSpotLogs,

@@ -50,6 +50,11 @@ import { LogData } from '../settings/logs';
 export const backend = {
 	getSteamPath: ffi<[], string>('Core_GetSteamPath'),
 
+	store: {
+		/** the plugin/theme lists for the o2steam Store, downloaded by the backend (the page itself is blocked by CORS) */
+		fetchJson: ffi<[url: string], { success: boolean; body?: string; error?: string }>('Core_FetchStoreJson'),
+	},
+
 	plugins: {
 		getPlugins: ffi<[], PluginComponent[]>('Core_FindAllPlugins'),
 		togglePlugin: ffi<[pluginJson: string], void>('Core_ChangePluginStatus'),

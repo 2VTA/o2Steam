@@ -86,6 +86,7 @@ class millennium_backend : public std::enable_shared_from_this<millennium_backen
 
     /** Theme and Plugin update API */
     builtin_payload Core_GetUpdates(const builtin_payload& args);
+    builtin_payload Core_FetchStoreJson(const builtin_payload& args);
     builtin_payload Core_CheckMillenniumUpdate(const builtin_payload& args);
 
     /** Theme manager API */

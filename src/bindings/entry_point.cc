@@ -39,6 +39,7 @@
 
 #include "millennium/environment.h"
 #include "millennium/encoding.h"
+#include "millennium/http.h"
 #include "millennium/http_hooks.h"
 #include "millennium/logger.h"
 #include "millennium/millennium.h"
@@ -114,6 +115,7 @@ head::millennium_backend::millennium_backend(std::shared_ptr<network_hook_ctl> n
         register_function(Core_GetBackendConfig),
         register_function(Core_SetBackendConfig, "config", "skipPropagation"),
         register_function(Core_GetUpdates, "force"),
+        register_function(Core_FetchStoreJson, "url"),
         register_function(Core_GetActiveTheme),
         register_function(Core_ChangeActiveTheme, "theme_name"),
         register_function(Core_GetSystemColors),
@@ -355,6 +357,42 @@ builtin_payload head::millennium_backend::Core_SetBackendConfig(const builtin_pa
 builtin_payload head::millennium_backend::Core_GetUpdates(const builtin_payload& args)
 {
     return m_updater->check_for_updates(args.value("force", false)).value_or(nullptr);
+}
+
+/**
+ * o2steam Store: downloads the plugin/theme lists for the store page. The page can't do it itself
+ * (steambrew.app's plugin list is sent without CORS headers), so it asks here. Only the two lists the
+ * store uses are allowed - this is not a general "fetch any URL" for scripts.
+ */
+builtin_payload head::millennium_backend::Core_FetchStoreJson(const builtin_payload& args)
+{
+    if (!args.contains("url") || !args["url"].is_string()) {
+        return { { "success", false }, { "error", "missing or invalid 'url'" } };
+    }
+
+    const std::string url = args["url"].get<std::string>();
+    static const char* allowed_prefixes[] = {
+        "https://steambrew.app/api/v1/plugins",
+        "https://raw.githubusercontent.com/2VTA/o2Steam/",
+    };
+
+    bool allowed = false;
+    for (const char* prefix : allowed_prefixes) {
+        if (url.rfind(prefix, 0) == 0) {
+            allowed = true;
+            break;
+        }
+    }
+
+    if (!allowed) {
+        return { { "success", false }, { "error", "this address is not allowed" } };
+    }
+
+    try {
+        return { { "success", true }, { "body", Http::Get(url.c_str(), true, 20L) } };
+    } catch (const std::exception& ex) {
+        return { { "success", false }, { "error", ex.what() } };
+    }
 }
 
 /** Theme manager API */
