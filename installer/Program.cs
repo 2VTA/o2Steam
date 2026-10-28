@@ -78,7 +78,7 @@ sealed class InstallerForm : Form
             Dock = DockStyle.Top,
             Height = 150,
             SizeMode = PictureBoxSizeMode.Zoom,
-            BackColor = Color.FromArgb(27, 40, 56),
+            BackColor = Color.Black,
             Image = logoStream is null ? null : Image.FromStream(logoStream),
         };
 
