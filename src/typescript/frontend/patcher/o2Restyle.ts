@@ -202,7 +202,11 @@ function applyToDocument(doc: Document, css: string) {
 		el = doc.createElement('style');
 		el.id = STYLE_ID;
 	}
-	if (el.textContent !== css) el.textContent = css;
+	// compare a short key instead of the 2-3 MB text
+	if (el.dataset.o2key !== cachedKey) {
+		el.textContent = css;
+		el.dataset.o2key = cachedKey;
+	}
 	// keep it after Steam's sheets (Steam appends more as chunks load)
 	if (doc.head && doc.head.lastElementChild !== el) doc.head.appendChild(el);
 }
@@ -214,7 +218,7 @@ function refreshAllWindows() {
 	try {
 		for (const popup of Array.from((window as any).g_PopupManager?.GetPopups?.() ?? []) as any[]) {
 			const doc: Document | undefined = popup?.window?.document;
-			if (doc?.head) applyToDocument(doc, css);
+			if (doc?.head && wantsRestyle(popup?.m_strName ?? '', popup?.m_strTitle ?? popup?.title ?? '')) applyToDocument(doc, css);
 		}
 	} catch {}
 }
@@ -230,8 +234,17 @@ function watchForNewSheets() {
 	}).observe(document.head, { childList: true });
 }
 
+/**
+ * Menus and the top-bar pop-ups are styled by the theme's own menu sheet; giving each of them the full
+ * recoloured copy of Steam's CSS would only cost a parse every time a menu opens.
+ */
+function wantsRestyle(windowName: string, title: string): boolean {
+	return !/contextmenu/i.test(windowName) && !/(Menu|Supernav)$/.test(title);
+}
+
 /** Called for every Steam window as it is themed. */
-export function applyO2Restyle(doc: Document) {
+export function applyO2Restyle(doc: Document, windowName = '', title = '') {
+	if (!wantsRestyle(windowName, title)) return;
 	const s = readSettings(pluginSelf?.activeTheme);
 	if (!s) return;
 	try {

@@ -153,7 +153,7 @@ export function patchDocumentContext(windowContext: any) {
 	pluginSelf?.RootColors && DOMModifier.AddStyleSheetFromText(document, pluginSelf.RootColors, 'RootColors');
 
 	/** o2steam: recolour Steam's own stylesheets when the theme asks for it */
-	applyO2Restyle(document);
+	applyO2Restyle(document, windowContext?.m_strName ?? '', windowContext?.m_strTitle ?? windowContext?.title ?? '');
 }
 
 /** o2steam: re-applies the active theme (and its saved conditions) to every open window, e.g. after a setting changed. */

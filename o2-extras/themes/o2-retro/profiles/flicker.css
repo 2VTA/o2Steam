@@ -1,3 +1,3 @@
-@keyframes o2-flicker { 0%, 100% { opacity: 1; } 47% { opacity: 1; } 50% { opacity: 0.93; } 53% { opacity: 1; } }
-html::before { animation: o2-flicker 4s steps(1, end) infinite; }
-@media (prefers-reduced-motion: reduce) { html::before { animation: none; } }
+@keyframes o2-flicker { 0%, 100% { opacity: 1; } 47% { opacity: 1; } 50% { opacity: 0.8; } 53% { opacity: 1; } }
+html::after { animation: o2-flicker 4s steps(1, end) infinite; }
+@media (prefers-reduced-motion: reduce) { html::after { animation: none; } }

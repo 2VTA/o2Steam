@@ -29,6 +29,8 @@ const state = {
 	registryStatus: 'not loaded yet',
 	hashToUrl: new Map<string, string>(),
 	selfSteamId: '',
+	mapSignature: '',
+	mapChanged: false,
 	listeners: new Set<() => void>(),
 };
 
@@ -91,6 +93,9 @@ function rebuildHashMap() {
 			if (isSafeImage(url)) next.set(hash.toLowerCase(), url);
 		});
 	}
+	const signature = [...next].map(([h, u]) => h + '=' + u.length + u.slice(-24)).join('|');
+	state.mapChanged = signature !== state.mapSignature;
+	state.mapSignature = signature;
 	state.hashToUrl = next;
 }
 
@@ -124,6 +129,8 @@ function scan(root: ParentNode) {
 const attached = new WeakSet<Document>();
 
 function attachDocument(doc: Document | undefined | null) {
+	// nothing to swap -> don't watch the page at all
+	if (!state.hashToUrl.size) return;
 	if (!doc || attached.has(doc)) return;
 	if (!doc.documentElement) return;
 	attached.add(doc);
@@ -145,7 +152,7 @@ function attachDocument(doc: Document | undefined | null) {
 			}
 		}
 	});
-	observer.observe(doc.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'style'] });
+	observer.observe(doc.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
 	scan(doc);
 }
 
@@ -283,11 +290,12 @@ export default async function PluginMain() {
 
 	refreshRegistry();
 	setInterval(refreshRegistry, 10 * 60 * 1000);
-	// friends load their personas a little after start, and people change avatars
+	// friends load their personas a little after start, and people change avatars: look again now and
+	// then, but only touch the pages when the list of swapped avatars actually changed
 	setInterval(() => {
 		rebuildHashMap();
-		rescanAll();
-	}, 4000);
+		if (state.mapChanged && state.hashToUrl.size) rescanAll();
+	}, 15000);
 
 	return {
 		title: 'o2steam Avatars',

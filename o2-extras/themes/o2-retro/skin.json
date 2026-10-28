@@ -2,7 +2,7 @@
 	"name": "o2 Retro Terminal",
 	"description": "A CRT terminal look for Steam: phosphor colours, scanlines and glow. Nothing is loaded from the internet.",
 	"author": "Ryder (o2cord)",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"tags": [
 		"Retro",
 		"Terminal",
@@ -208,39 +208,25 @@
 				"cssVariable": "--o2-restyle"
 			}
 		},
-		"Phosphor tint": {
-			"description": "> A phosphor-coloured film over the whole screen, pictures included. 0 leaves pictures and Steam's colours as they are.",
-			"default": "0",
-			"slider": {
-				"min": 0,
-				"max": 100,
-				"step": 5,
-				"unit": "%",
-				"cssVariable": "--o2-tint"
-			}
-		},
-		"Colour shift": {
-			"description": "> Pulls every colour on screen, pictures included, toward the phosphor colour. 0 leaves colours alone.",
-			"default": "0",
-			"slider": {
-				"min": 0,
-				"max": 100,
-				"step": 5,
-				"unit": "%",
-				"cssVariable": "--o2-hue"
-			}
-		},
-		"Colour mode": {
-			"description": "> Keep colours: Steam keeps its own colours with a phosphor tint over them.\n\n- Black and white: everything is turned grey first, so the screen is one colour like a real terminal.",
-			"default": "Keep colours",
+		"Text glow": {
+			"description": "> The soft glow around text. On = headings, tabs and accents only (light). Everything = all text (heavier while scrolling).",
+			"default": "On",
 			"values": {
-				"Keep colours": {},
-				"Black and white": {
+				"On": {},
+				"Off": {
 					"TargetCss": {
 						"affects": [
 							".*"
 						],
-						"src": "profiles/mono.css"
+						"src": "profiles/no-glow.css"
+					}
+				},
+				"Everything": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/glow-all.css"
 					}
 				}
 			}
@@ -268,21 +254,6 @@
 				}
 			}
 		},
-		"Text glow": {
-			"description": "> The soft glow around text.",
-			"default": "On",
-			"values": {
-				"On": {},
-				"Off": {
-					"TargetCss": {
-						"affects": [
-							".*"
-						],
-						"src": "profiles/no-glow.css"
-					}
-				}
-			}
-		},
 		"Flicker": {
 			"description": "> A slow screen flicker. Stops if Windows has reduced motion turned on.",
 			"default": "Off",
@@ -294,6 +265,58 @@
 							".*"
 						],
 						"src": "profiles/flicker.css"
+					}
+				}
+			}
+		},
+		"Colour film": {
+			"description": "> A colour film over the whole screen, pictures included (uses the Phosphor tint and Colour shift sliders). Off keeps Steam lighter.",
+			"default": "Off",
+			"values": {
+				"Off": {},
+				"On": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/film.css"
+					}
+				}
+			}
+		},
+		"Phosphor tint": {
+			"description": "> Strength of the colour film (only when Colour film is On).",
+			"default": "0",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-tint"
+			}
+		},
+		"Colour shift": {
+			"description": "> How far the colour film pulls every colour toward the phosphor colour (only when Colour film is On).",
+			"default": "0",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-hue"
+			}
+		},
+		"Colour mode": {
+			"description": "> Keep colours: Steam keeps its own colours with a phosphor tint over them.\n\n- Black and white: everything is turned grey first, so the screen is one colour like a real terminal.",
+			"default": "Keep colours",
+			"values": {
+				"Keep colours": {},
+				"Black and white": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/mono.css"
 					}
 				}
 			}

@@ -228,12 +228,14 @@ function mount() {
 	});
 
 	// the trade changes and the inventory switches without us being told, so just look again now and then
-	setInterval(() => render(false), 700);
+	setInterval(() => render(false), 1500);
 }
 
 export default async function WebkitMain() {
 	if (!isTradeOfferPage()) return;
+	let tries = 0;
 	const wait = setInterval(() => {
+		if (++tries > 120) return clearInterval(wait); // page never became a trade offer page - stop looking
 		if (!pageReady()) return;
 		clearInterval(wait);
 		mount();

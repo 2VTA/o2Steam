@@ -1,15 +1,13 @@
 /*
  * o2 Retro Terminal - a CRT look for Steam, after the RetroTerminal theme in o2cord.
  *
- * Everything is drawn without touching Steam's own class names, so it keeps working when Steam updates:
- *  - a fixed layer on top multiplies everything by the phosphor colour mixed with white
- *    ("Phosphor tint" slider: 100 = pure one-colour screen, lower keeps more of the real colours)
- *  - a "color" blend layer pulls the hue toward the phosphor colour ("Colour shift" slider) so Steam's blue
- *    interface turns amber/green/... while pictures keep most of their own colours
- *  - the "Black and white" colour mode (profiles/mono.css) greys the screen out first; it is a separate file
- *    because a filter on <body> would break fixed/sticky elements on web pages, so it is only used when chosen
- *  - a second fixed layer paints scanlines and the dark curved corners
- *  - text gets a small glow, fonts are the system monospace ones
+ * Kept light on purpose (no full-screen blend layers, no glow on every line of text):
+ *  - Steam's own colours are recoloured once by o2steam's restyle engine (see skin.json "o2Restyle"),
+ *    not by a layer painted over the screen every frame
+ *  - one static layer paints the scanlines and the dark corners
+ *  - the glow is only on headings, tabs and other accents ("Text glow: Everything" puts it on all text)
+ *  - the optional "Colour film" (profiles/film.css) adds the old full-screen tint/hue layers; off by default
+ *  - the "Black and white" colour mode (profiles/mono.css) greys the screen out first
  * No fonts, pictures or scripts are loaded from the internet.
  */
 
@@ -26,34 +24,20 @@
 	--radius-lg: 0px;
 }
 
-body {
+/* glow on accents only */
+.SuperNavMenu,
+.SectionHeader,
+.GamePlaySummaryHeader,
+.ShowcaseHeader,
+.PlayBarGameName,
+.WhosPlaying,
+.DialogHeader,
+h1,
+h2 {
 	text-shadow: 0 0 var(--o2-glow) currentColor;
 }
 
-/* phosphor colour */
-html::before {
-	content: "";
-	position: fixed;
-	inset: 0;
-	z-index: 2147483646;
-	pointer-events: none;
-	background: color-mix(in srgb, var(--o2-fg) var(--o2-tint), white);
-	mix-blend-mode: multiply;
-}
-
-/* shifts the hue of the whole screen toward the phosphor colour while keeping brightness ("Colour shift" slider) */
-body::after {
-	content: "";
-	position: fixed;
-	inset: 0;
-	z-index: 2147483645;
-	pointer-events: none;
-	background: var(--o2-fg);
-	mix-blend-mode: color;
-	opacity: var(--o2-hue);
-}
-
-/* scanlines + dark corners */
+/* scanlines + dark corners: a single static layer */
 html::after {
 	content: "";
 	position: fixed;
@@ -67,7 +51,6 @@ html::after {
 
 * {
 	font-family: var(--o2-font) !important;
-	scrollbar-color: #fff #000;
 }
 
 input,
@@ -81,7 +64,7 @@ button,
 }
 
 ::selection {
-	background: #fff;
+	background: var(--o2-fg);
 	color: #000;
 	text-shadow: none;
 }

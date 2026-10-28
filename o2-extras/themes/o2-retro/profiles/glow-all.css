@@ -1,0 +1,4 @@
+/* o2 Retro Terminal - glow on every line of text (heavier to draw while scrolling) */
+body {
+	text-shadow: 0 0 var(--o2-glow) currentColor;
+}
