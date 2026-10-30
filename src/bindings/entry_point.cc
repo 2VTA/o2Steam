@@ -379,7 +379,8 @@ builtin_payload head::millennium_backend::Core_GetUpdates(const builtin_payload&
 /**
  * o2steam Store: downloads the plugin/theme lists for the store page. The page can't do it itself
  * (steambrew.app's plugin list is sent without CORS headers), so it asks here. Only the two lists the
- * store uses are allowed - this is not a general "fetch any URL" for scripts.
+ * store uses (plus Tenor GIF pages, for the Avatars plugin) are allowed - this is not a general
+ * "fetch any URL" for scripts.
  */
 builtin_payload head::millennium_backend::Core_FetchStoreJson(const builtin_payload& args)
 {
@@ -392,6 +393,7 @@ builtin_payload head::millennium_backend::Core_FetchStoreJson(const builtin_payl
         "https://steambrew.app/api/v1/plugins",
         "https://steambrew.app/api/v2", // Millennium's theme list
         "https://raw.githubusercontent.com/2VTA/o2Steam/",
+        "https://tenor.com/view/", // o2steam Avatars: a Tenor page link is read once to find its real GIF
     };
 
     bool allowed = false;

@@ -53,6 +53,50 @@ function notify() {
 	state.listeners.forEach((l) => l());
 }
 
+// ---------------------------------------------------------------- share-page links -> the real image
+// People paste the page they copied from (tenor.com/view/..., giphy.com/gifs/...), which is a web page,
+// not an image, so nothing would show. Turn those into the direct GIF.
+
+/** media1.tenor.com/m/<id>/<name>.gif answers 404 outside a browser tab; media.tenor.com/<id>/<name>.gif works */
+function tenorMediaUrl(url: string): string {
+	return url.replace(/^https:\/\/media\d*\.tenor\.com\/m\//i, 'https://media.tenor.com/');
+}
+
+async function resolveImageLink(url: string): Promise<string> {
+	const giphy = /^https:\/\/(?:www\.)?giphy\.com\/gifs\/(?:[^/?#]*-)?([A-Za-z0-9]+)(?:[/?#]|$)/i.exec(url);
+	if (giphy) return `https://media.giphy.com/media/${giphy[1]}/giphy.gif`;
+
+	if (/^https:\/\/media\d*\.tenor\.com\/m\//i.test(url)) return tenorMediaUrl(url);
+
+	if (/^https:\/\/(?:www\.)?tenor\.com\/(?:[a-z-]+\/)?view\//i.test(url)) {
+		// tenor's page has no CORS headers, so o2steam's core reads it (it only allows tenor.com/view/ pages)
+		const page = url.replace(/^https:\/\/(?:www\.)?tenor\.com\/(?:[a-z-]+\/)?view\//i, 'https://tenor.com/view/').split(/[?#]/)[0];
+		const result: any = await W.MILLENNIUM_API.ffi('Core_FetchStoreJson')(page);
+		const html: string = result?.success ? String(result.body ?? '') : '';
+		const og = /property="og:image"\s+content="([^"]+)"/i.exec(html) ?? /content="([^"]+)"\s+property="og:image"/i.exec(html);
+		if (!og) throw new Error('Could not read that Tenor link.');
+		return tenorMediaUrl(og[1]);
+	}
+	return url;
+}
+
+/** resolves after the browser actually decoded the image, so a page link or a dead link is caught */
+function checkImageLoads(url: string): Promise<boolean> {
+	return new Promise((resolve) => {
+		const img = new Image();
+		const timer = setTimeout(() => resolve(false), 15000);
+		img.onload = () => {
+			clearTimeout(timer);
+			resolve(img.naturalWidth > 0);
+		};
+		img.onerror = () => {
+			clearTimeout(timer);
+			resolve(false);
+		};
+		img.src = url;
+	});
+}
+
 function isSafeImage(url: unknown): url is string {
 	return typeof url === 'string' && (/^https:\/\//i.test(url) || /^data:image\/(gif|png|jpeg|webp);base64,/i.test(url));
 }
@@ -225,12 +269,20 @@ function Panel() {
 		force();
 	};
 
-	const useLink = () => {
+	const useLink = async () => {
 		const url = draft.trim();
 		if (!url) return apply('');
 		if (!/^https:\/\//i.test(url)) return setMessage('Use an https:// link to an image or GIF.');
-		setMessage('');
-		apply(url);
+		setMessage('Checking the link...');
+		try {
+			const direct = await resolveImageLink(url);
+			if (!(await checkImageLoads(direct))) return setMessage("That link doesn't open as an image. Use a direct image/GIF link (Tenor and Giphy page links are converted for you).");
+			setDraft(direct);
+			setMessage(direct !== url ? 'Converted to the direct GIF link and applied.' : 'Applied.');
+			apply(direct);
+		} catch (e: any) {
+			setMessage(String(e?.message ?? e));
+		}
 	};
 
 	const pickFile = () => {
@@ -279,9 +331,26 @@ function Panel() {
 	);
 }
 
+/** a page link saved by an older version (e.g. tenor.com/view/...) is turned into the direct image once */
+async function repairSavedLink() {
+	const mine = state.saved.mine;
+	if (!mine || mine.startsWith('data:')) return;
+	try {
+		const direct = await resolveImageLink(mine);
+		if (direct !== mine && (await checkImageLoads(direct))) {
+			state.saved.mine = direct;
+			persist();
+			rebuildHashMap();
+			rescanAll();
+			notify();
+		}
+	} catch {}
+}
+
 export default async function PluginMain() {
 	loadSaved();
 	rebuildHashMap();
+	void repairSavedLink();
 
 	try {
 		Array.from(g_PopupManager.GetPopups()).forEach(attachPopup);
