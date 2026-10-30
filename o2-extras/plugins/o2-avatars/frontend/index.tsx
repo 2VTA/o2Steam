@@ -71,7 +71,7 @@ async function resolveImageLink(url: string): Promise<string> {
 	if (/^https:\/\/(?:www\.)?tenor\.com\/(?:[a-z-]+\/)?view\//i.test(url)) {
 		// tenor's page has no CORS headers, so o2steam's core reads it (it only allows tenor.com/view/ pages)
 		const page = url.replace(/^https:\/\/(?:www\.)?tenor\.com\/(?:[a-z-]+\/)?view\//i, 'https://tenor.com/view/').split(/[?#]/)[0];
-		const result: any = await W.MILLENNIUM_API.ffi('Core_FetchStoreJson')(page);
+		const result: any = await W.MILLENNIUM_API.ffi('core', 'Core_FetchStoreJson')(page);
 		const html: string = result?.success ? String(result.body ?? '') : '';
 		const og = /property="og:image"\s+content="([^"]+)"/i.exec(html) ?? /content="([^"]+)"\s+property="og:image"/i.exec(html);
 		if (!og) throw new Error('Could not read that Tenor link.');
