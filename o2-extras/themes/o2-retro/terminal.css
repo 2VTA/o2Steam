@@ -124,6 +124,14 @@ h2 {
 	background-image: none !important;
 }
 
+/* in the friends list the title bar is an invisible layer over your own avatar + name; keep it see-through
+   or it hides the name, status and the collapse button */
+.friendListHeaderContainer .TitleBar,
+.friendListHeaderContainer .title-area {
+	background: transparent !important;
+	background-image: none !important;
+}
+
 .TopBar {
 	border-bottom: 1px solid var(--o2-dim);
 }
