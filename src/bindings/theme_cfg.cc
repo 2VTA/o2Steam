@@ -141,6 +141,17 @@ void head::theme_config_store::validate_theme()
 
     std::string active = CONFIG.get({ "themes", "activeTheme" }).get<std::string>();
     if (active != "default" && !head::Themes::IsValid(active)) {
+        /**
+         * o2steam: this runs on every config change, and skin.json can be unreadable for a moment (an update
+         * unpacking the theme, antivirus scanning it, a half-written file). Resetting then threw people back to
+         * the default theme for good. Only reset when the theme's folder is really gone.
+         */
+        std::error_code ec;
+        const auto theme_dir = platform::get_millennium_path() / "themes" / active;
+        if (std::filesystem::is_directory(theme_dir, ec) || ec) {
+            logger.warn("Theme '" + active + "' could not be read right now; keeping it selected.");
+            return;
+        }
         logger.log("Theme '" + active + "' is invalid. Resetting to default.");
         CONFIG.set({ "themes", "activeTheme" }, "default");
     }

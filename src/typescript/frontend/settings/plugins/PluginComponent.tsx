@@ -28,6 +28,7 @@
  * SOFTWARE.
  */
 
+import { menuAnchor } from '../../utils/menu-anchor';
 import { Field, IconsModule, Menu, MenuItem, showContextMenu, Toggle } from '@steambrew/sdk';
 import React, { Component } from 'react';
 import { IconButton } from '../../components/IconButton';
@@ -153,7 +154,7 @@ export class RenderPluginComponent extends Component<PluginComponentProps, Rende
 				<MenuItem onSelected={this.uninstallPlugin.bind(this)}>{locale.uninstall}</MenuItem>
 				<MenuItem onSelected={Utils.BrowseLocalFolder.bind(null, plugin.path)}>{locale.optionBrowseLocalFiles}</MenuItem>
 			</Menu>,
-			e.currentTarget ?? window,
+			menuAnchor(e),
 		);
 	}
 

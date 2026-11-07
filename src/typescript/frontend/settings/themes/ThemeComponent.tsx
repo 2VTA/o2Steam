@@ -28,6 +28,7 @@
  * SOFTWARE.
  */
 
+import { menuAnchor } from '../../utils/menu-anchor';
 import { DialogButton, Field, IconsModule, joinClassNames, Menu, MenuItem, pluginSelf, showContextMenu } from '@steambrew/sdk';
 import { ThemeItem } from '../../types';
 import { DesktopTooltip, Separator } from '../../components/SteamComponents';
@@ -150,7 +151,7 @@ export class ThemeItemComponent extends Component<ThemeItemComponentProps, Theme
 				<MenuItem onSelected={this.openThemeFolder.bind(this)}>{locale.optionBrowseLocalFiles}</MenuItem>
 				<MenuItem onSelected={this.uninstallTheme.bind(this)}>{locale.uninstall}</MenuItem>
 			</Menu>,
-			event.currentTarget ?? window,
+			menuAnchor(event),
 		);
 	}
 
