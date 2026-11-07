@@ -352,7 +352,7 @@ sealed class InstallerForm : Form
 
             var plugins = root["plugins"] as System.Text.Json.Nodes.JsonObject ?? new System.Text.Json.Nodes.JsonObject();
             var enabled = plugins["enabledPlugins"] as System.Text.Json.Nodes.JsonArray ?? new System.Text.Json.Nodes.JsonArray();
-            foreach (var name in new[] { "o2-avatars", "o2-trade-stack" })
+            foreach (var name in new[] { "o2-avatars", "o2-trade-stack", "o2-friend-rules" })
                 if (!enabled.Any(n => n?.GetValue<string>() == name)) enabled.Add(name);
             plugins["enabledPlugins"] = enabled;
             root["plugins"] = plugins;

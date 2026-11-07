@@ -1,0 +1,8 @@
+{
+	"name": "o2-friend-rules",
+	"common_name": "o2steam Friend Rules",
+	"description": "Your own rules for incoming friend requests: accept, ignore or block by Steam level, privacy, country, mutual friends, name, CS2 inventory and repeat requests. Works inside Steam, no browser needed.",
+	"version": "0.1.0",
+	"useBackend": false,
+	"frontend": "frontend"
+}

@@ -83,7 +83,7 @@ static void apply_proxy(CURL* curl)
 namespace Http
 {
 
-std::string Get(const char* url, bool retry, const long timeout)
+std::string Get(const char* url, bool retry, const long timeout, long* status_out)
 {
     CURL* curl;
     CURLcode res;
@@ -98,6 +98,8 @@ std::string Get(const char* url, bool retry, const long timeout)
         curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
+        // o2steam: unpack gzip/deflate answers (steamcommunity.com compresses even when not asked)
+        curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
         apply_proxy(curl);
 
         while (true) {
@@ -113,6 +115,11 @@ std::string Get(const char* url, bool retry, const long timeout)
                 throw HttpError("Thread termination flag is set, aborting HTTP request.");
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
+        if (status_out) {
+            long status = 0;
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
+            *status_out = status;
         }
         curl_easy_cleanup(curl);
     }

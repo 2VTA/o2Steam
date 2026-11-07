@@ -55,7 +55,7 @@ class HttpError : public std::runtime_error
 
 namespace Http
 {
-std::string Get(const char* url, bool retry = true, const long timeout = 10L);
+std::string Get(const char* url, bool retry = true, const long timeout = 10L, long* status_out = nullptr);
 std::string Post(const char* url, const std::string& postData, bool retry = true);
 void DownloadWithProgress(const std::tuple<std::string, size_t>& download_info, const std::filesystem::path& destPath, std::function<void(size_t, size_t)> progressCallback);
 } // namespace Http

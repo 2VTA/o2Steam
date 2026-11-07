@@ -54,6 +54,7 @@
 #include "millennium/plugin_config.h"
 #include <exception>
 #include <fstream>
+#include <regex>
 #include <thread>
 
 std::weak_ptr<head::theme_webkit_mgr> head::millennium_backend::get_theme_webkit_mgr()
@@ -396,11 +397,27 @@ builtin_payload head::millennium_backend::Core_FetchStoreJson(const builtin_payl
         "https://tenor.com/view/", // o2steam Avatars: a Tenor page link is read once to find its real GIF
     };
 
+    /**
+     * o2steam Friend Rules: three public Steam Community reads that Steam's page can't make itself (no CORS
+     * headers). They are matched exactly - one steamid, one item name - so this can't be used for anything else.
+     *   profile summary (privacy, country), the CS2 inventory (private = "null"), one Steam market price
+     */
+    static const std::regex allowed_patterns[] = {
+        std::regex(R"(^https://steamcommunity\.com/profiles/7656119\d{10}/\?xml=1$)"),
+        std::regex(R"(^https://steamcommunity\.com/inventory/7656119\d{10}/730/2\?l=english&count=\d{1,4}$)"),
+        std::regex(R"(^https://steamcommunity\.com/market/priceoverview/\?appid=730&currency=\d{1,2}&market_hash_name=[A-Za-z0-9%._~\-]{1,300}$)"),
+    };
+
     bool allowed = false;
     for (const char* prefix : allowed_prefixes) {
         if (url.rfind(prefix, 0) == 0) {
             allowed = true;
             break;
+        }
+    }
+    for (const auto& pattern : allowed_patterns) {
+        if (!allowed && std::regex_match(url, pattern)) {
+            allowed = true;
         }
     }
 
@@ -409,7 +426,15 @@ builtin_payload head::millennium_backend::Core_FetchStoreJson(const builtin_payl
     }
 
     try {
-        return { { "success", true }, { "body", Http::Get(url.c_str(), true, 20L) } };
+        long status = 0;
+        std::string body = Http::Get(url.c_str(), false, 20L, &status);
+        builtin_payload result = { { "success", true }, { "body", body }, { "status", status } };
+        try {
+            (void)result.dump(); // not text (e.g. still compressed): answer with an error instead of throwing later
+        } catch (const std::exception&) {
+            return { { "success", false }, { "error", "the answer could not be read" } };
+        }
+        return result;
     } catch (const std::exception& ex) {
         return { { "success", false }, { "error", ex.what() } };
     }
