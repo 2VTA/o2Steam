@@ -19,10 +19,56 @@ import { pluginSelf } from '@steambrew/sdk';
 import { ThemeItem } from '../types';
 
 interface RestyleSettings {
-	fg: [number, number, number];
+	/** one colour in, one colour out (alpha is kept) */
+	map: (r: number, g: number, b: number) => [number, number, number];
+	/** what the map depends on - part of the cache key */
+	key: string;
 	strength: number; // 0..1
 	square: boolean;
 	noShadows: boolean;
+}
+
+/**
+ * "grade" mode (the o2 VHS theme): a tape colour grade instead of one phosphor colour - less colour,
+ * split-toned dark->shadow / light->highlight, faded blacks. Same maths as o2cord's VHS theme.
+ *   "o2Restyle": { "mode": "grade",
+ *     "grade": { "condition": "Tape colours", "default": "Home tape",
+ *                "values": { "Home tape": { "shadow": "#22102a", "highlight": "#fff2dc", "tone": 0.42, "desat": 0.3, "lift": 0.06 },
+ *                            "Steam colours": null } },
+ *     "strength": { "condition": "...", "default": 100 }, "square": false, "noShadows": false }
+ * A null grade means "leave Steam's colours alone" (no restyle at all).
+ */
+interface Grade {
+	shadow: [number, number, number];
+	highlight: [number, number, number];
+	tone: number;
+	desat: number;
+	lift: number;
+}
+
+function gradeMap(g: Grade, strength: number) {
+	const sh = g.shadow.map((v) => v / 255);
+	const hi = g.highlight.map((v) => v / 255);
+	return (r: number, gr: number, b: number): [number, number, number] => {
+		const c = [r / 255, gr / 255, b / 255];
+		const y = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+		return c.map((v, i) => {
+			const flat = v + (y - v) * g.desat;
+			const toned = flat + (sh[i] * (1 - y) + hi[i] * y - flat) * g.tone;
+			const lifted = g.lift + toned * (1 - g.lift);
+			const graded = Math.min(1, Math.max(0, lifted)) * 255;
+			return Math.round(c[i] * 255 * (1 - strength) + graded * strength);
+		}) as [number, number, number];
+	};
+}
+
+function phosphorMap(fg: [number, number, number], k: number) {
+	return (r: number, g: number, b: number): [number, number, number] => {
+		// terminal contrast: Steam's dark greys go to black, its light text goes to the full phosphor colour
+		const raw = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+		const lum = Math.pow(Math.max(0, Math.min(1, (raw - 0.1) / 0.6)), 1.15);
+		return [r, g, b].map((c, i) => Math.round(Math.max(0, Math.min(255, c * (1 - k) + fg[i] * lum * k)))) as [number, number, number];
+	};
 }
 
 const STYLE_ID = 'o2steam-restyle';
@@ -43,27 +89,33 @@ function readSettings(theme: ThemeItem | undefined): RestyleSettings | undefined
 	if (!spec) return undefined;
 
 	const saved: Record<string, string> = pluginSelf?.conditionals?.[theme!.native] ?? {};
+	const rawStrength = Number(saved[spec.strength?.condition] ?? spec.strength?.default ?? (spec.mode === 'grade' ? 100 : 70));
+	const strength = Math.max(0, Math.min(1, (isNaN(rawStrength) ? 70 : rawStrength) / 100));
+	const square = spec.mode === 'grade' ? spec.square === true : spec.square !== false;
+	const noShadows = spec.mode === 'grade' ? spec.noShadows === true : spec.noShadows !== false;
+
+	if (spec.mode === 'grade') {
+		const name = saved[spec.grade?.condition] ?? spec.grade?.default;
+		const g = spec.grade?.values?.[name];
+		if (!g) return undefined; // e.g. "Steam colours": no recolouring
+		const shadow = parseHex(String(g.shadow ?? ''));
+		const highlight = parseHex(String(g.highlight ?? ''));
+		if (!shadow || !highlight) return undefined;
+		const num = (v: any, d: number) => (typeof v === 'number' && isFinite(v) ? Math.max(0, Math.min(1, v)) : d);
+		const grade: Grade = { shadow, highlight, tone: num(g.tone, 0.4), desat: num(g.desat, 0.3), lift: num(g.lift, 0.05) };
+		return { map: gradeMap(grade, strength), key: `grade:${JSON.stringify(grade)}`, strength, square, noShadows };
+	}
+
 	const fgName = saved[spec.fg?.condition] ?? spec.fg?.default;
 	const fg = parseHex(spec.fg?.values?.[fgName] ?? '');
 	if (!fg) return undefined;
-
-	const rawStrength = Number(saved[spec.strength?.condition] ?? spec.strength?.default ?? 70);
-	return {
-		fg,
-		strength: Math.max(0, Math.min(1, (isNaN(rawStrength) ? 70 : rawStrength) / 100)),
-		square: spec.square !== false,
-		noShadows: spec.noShadows !== false,
-	};
+	return { map: phosphorMap(fg, strength), key: `fg:${fg.join(',')}`, strength, square, noShadows };
 }
 
 // ---------------------------------------------------------------- colour mapping
 
 function mapRgb(r: number, g: number, b: number, a: number, s: RestyleSettings): string {
-	// terminal contrast: Steam's dark greys go to black, its light text goes to the full phosphor colour
-	const raw = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-	const lum = Math.pow(Math.max(0, Math.min(1, (raw - 0.1) / 0.6)), 1.15);
-	const k = s.strength;
-	const out = [r, g, b].map((c, i) => Math.round(Math.max(0, Math.min(255, c * (1 - k) + s.fg[i] * lum * k))));
+	const out = s.map(r, g, b);
 	return a >= 0.999 ? `rgb(${out[0]}, ${out[1]}, ${out[2]})` : `rgba(${out[0]}, ${out[1]}, ${out[2]}, ${Math.round(a * 1000) / 1000})`;
 }
 
@@ -170,7 +222,7 @@ function steamSheets(): CSSStyleSheet[] {
 
 function buildCss(s: RestyleSettings): string {
 	const sheets = steamSheets();
-	const key = `${s.fg.join(',')}|${s.strength}|${s.square}|${s.noShadows}|${sheets.map((x) => (x.href ?? 'inline') + ':' + safeRuleCount(x)).join(',')}`;
+	const key = `${s.key}|${s.strength}|${s.square}|${s.noShadows}|${sheets.map((x) => (x.href ?? 'inline') + ':' + safeRuleCount(x)).join(',')}`;
 	if (key === cachedKey) return cachedCss;
 
 	const t0 = performance.now();
@@ -211,14 +263,20 @@ function applyToDocument(doc: Document, css: string) {
 	if (doc.head && doc.head.lastElementChild !== el) doc.head.appendChild(el);
 }
 
+function removeFromDocument(doc: Document) {
+	doc.getElementById(STYLE_ID)?.remove();
+}
+
 function refreshAllWindows() {
 	const s = readSettings(pluginSelf?.activeTheme);
-	if (!s) return;
-	const css = buildCss(s);
+	const css = s ? buildCss(s) : '';
 	try {
 		for (const popup of Array.from((window as any).g_PopupManager?.GetPopups?.() ?? []) as any[]) {
 			const doc: Document | undefined = popup?.window?.document;
-			if (doc?.head && wantsRestyle(popup?.m_strName ?? '', popup?.m_strTitle ?? popup?.title ?? '')) applyToDocument(doc, css);
+			if (!doc?.head) continue;
+			// the theme no longer recolours (e.g. "Steam colours" picked): take the old copy away
+			if (!s) removeFromDocument(doc);
+			else if (wantsRestyle(popup?.m_strName ?? '', popup?.m_strTitle ?? popup?.title ?? '')) applyToDocument(doc, css);
 		}
 	} catch {}
 }
@@ -246,7 +304,10 @@ function wantsRestyle(windowName: string, title: string): boolean {
 export function applyO2Restyle(doc: Document, windowName = '', title = '') {
 	if (!wantsRestyle(windowName, title)) return;
 	const s = readSettings(pluginSelf?.activeTheme);
-	if (!s) return;
+	if (!s) {
+		removeFromDocument(doc);
+		return;
+	}
 	try {
 		applyToDocument(doc, buildCss(s));
 		watchForNewSheets();
