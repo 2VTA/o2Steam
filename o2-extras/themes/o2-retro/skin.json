@@ -1,8 +1,8 @@
 {
 	"name": "o2 Retro Terminal",
-	"description": "A CRT terminal look for Steam: phosphor colours, scanlines and glow. Nothing is loaded from the internet.",
+	"description": "A CRT terminal look for Steam: phosphor colours, scanlines, glow, static, CRT corners, terminal fonts and a boot screen. Nothing is loaded from the internet.",
 	"author": "Ryder (o2cord)",
-	"version": "1.2.0",
+	"version": "1.3.0",
 	"tags": [
 		"Retro",
 		"Terminal",
@@ -15,107 +15,118 @@
 			"MatchRegexString": "^Steam$",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": "^OverlayBrowser_Browser$",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": "^SP Overlay:",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": "Menu$",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css",
-				"menus.css"
+				"terminal.css"
 			]
 		},
 		{
 			"MatchRegexString": "Supernav$",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css",
-				"menus.css"
+				"terminal.css"
 			]
 		},
 		{
 			"MatchRegexString": "^notificationtoasts_",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": "^SteamBrowser_Find$",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": "^OverlayTab\\d+_Find$",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": "^Steam Big Picture Mode$",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": "^QuickAccess_",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": "^MainMenu_",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": ".friendsui-container",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": ".ModalDialogPopup",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": ".FullModalOverlay",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			]
 		},
 		{
 			"MatchRegexString": "^https?://(store\\.steampowered|steamcommunity|help\\.steampowered|checkout\\.steampowered)\\.com(/.*)?$",
 			"TargetCss": [
 				"retro.css",
-				"terminal.css"
+				"terminal.css",
+				"profiles/noise.css"
 			],
 			"TargetJs": "web-restyle.js"
 		},
@@ -196,7 +207,8 @@
 						"src": "profiles/vga.css"
 					}
 				}
-			}
+			},
+			"section": "Colours"
 		},
 		"Restyle strength": {
 			"description": "> How much of Steam's own interface (panels, lists, text, buttons) is recoloured into the phosphor colour. Pictures keep their real colours. 100 = fully one colour, 0 = Steam's own colours. Applies to new windows; restart Steam to see it everywhere.",
@@ -207,30 +219,64 @@
 				"step": 5,
 				"unit": "%",
 				"cssVariable": "--o2-restyle"
-			}
+			},
+			"section": "Colours"
 		},
-		"Text glow": {
-			"description": "> The soft glow around text. On = headings, tabs and accents only (light). Everything = all text (heavier while scrolling).",
-			"default": "On",
+		"Colour mode": {
+			"description": "> Keep colours: Steam keeps its own colours with a phosphor tint over them.\n\n- Black and white: everything is turned grey first, so the screen is one colour like a real terminal.",
+			"default": "Keep colours",
 			"values": {
-				"On": {},
-				"Off": {
+				"Keep colours": {},
+				"Black and white": {
 					"TargetCss": {
 						"affects": [
 							".*"
 						],
-						"src": "profiles/no-glow.css"
-					}
-				},
-				"Everything": {
-					"TargetCss": {
-						"affects": [
-							".*"
-						],
-						"src": "profiles/glow-all.css"
+						"src": "profiles/mono.css"
 					}
 				}
-			}
+			},
+			"section": "Colours"
+		},
+		"Colour film": {
+			"description": "> A colour film over the whole screen, pictures included (uses the Phosphor tint and Colour shift sliders). Off keeps Steam lighter.",
+			"default": "Off",
+			"values": {
+				"Off": {},
+				"On": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/film.css"
+					}
+				}
+			},
+			"section": "Colours"
+		},
+		"Phosphor tint": {
+			"description": "> Strength of the colour film (only when Colour film is On).",
+			"default": "0",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-tint"
+			},
+			"section": "Colours"
+		},
+		"Colour shift": {
+			"description": "> How far the colour film pulls every colour toward the phosphor colour (only when Colour film is On).",
+			"default": "0",
+			"slider": {
+				"min": 0,
+				"max": 100,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-hue"
+			},
+			"section": "Colours"
 		},
 		"Scanlines": {
 			"description": "> How visible the scanlines are.",
@@ -253,7 +299,68 @@
 						"src": "profiles/strong-scanlines.css"
 					}
 				}
-			}
+			},
+			"section": "Screen"
+		},
+		"Dark edges": {
+			"description": "> How dark the corners and edges of the screen are. 0 = off.",
+			"default": "50",
+			"slider": {
+				"min": 0,
+				"max": 90,
+				"step": 5,
+				"unit": "%",
+				"cssVariable": "--o2-vignette"
+			},
+			"section": "Screen"
+		},
+		"Screen noise": {
+			"description": "> Fine static over the screen, like an old monitor. It is a still layer, so it costs almost nothing.",
+			"default": "Off",
+			"values": {
+				"Off": {},
+				"Light": {
+					"TargetCss": {
+						"affects": [
+							"^(?!Sign in to Steam)"
+						],
+						"src": "profiles/noise-light.css"
+					}
+				},
+				"Strong": {
+					"TargetCss": {
+						"affects": [
+							"^(?!Sign in to Steam)"
+						],
+						"src": "profiles/noise-strong.css"
+					}
+				}
+			},
+			"section": "Screen"
+		},
+		"TV corners": {
+			"description": "> Rounded black corners like a CRT screen. They only cover the very corners of the main windows (not the sign-in window or menus).",
+			"default": "Off",
+			"values": {
+				"Off": {},
+				"Rounded": {
+					"TargetCss": {
+						"affects": [
+							"^(?!Sign in to Steam)(?!.*(Menu|Supernav)$)"
+						],
+						"src": "profiles/corners-round.css"
+					}
+				},
+				"Old CRT": {
+					"TargetCss": {
+						"affects": [
+							"^(?!Sign in to Steam)(?!.*(Menu|Supernav)$)"
+						],
+						"src": "profiles/corners-tv.css"
+					}
+				}
+			},
+			"section": "Screen"
 		},
 		"Flicker": {
 			"description": "> A slow screen flicker. Stops if Windows has reduced motion turned on.",
@@ -268,10 +375,111 @@
 						"src": "profiles/flicker.css"
 					}
 				}
-			}
+			},
+			"section": "Screen"
 		},
-		"Colour film": {
-			"description": "> A colour film over the whole screen, pictures included (uses the Phosphor tint and Colour shift sliders). Off keeps Steam lighter.",
+		"Terminal font": {
+			"description": "> The font for all text. Steam's font keeps the colours and effects but uses Steam's normal letters.",
+			"default": "Cascadia Mono",
+			"values": {
+				"Cascadia Mono": {},
+				"Consolas": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/font-consolas.css"
+					}
+				},
+				"Lucida Console": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/font-lucida.css"
+					}
+				},
+				"Courier New": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/font-courier.css"
+					}
+				},
+				"Steam's font": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/font-steam.css"
+					}
+				}
+			},
+			"section": "Text"
+		},
+		"Upper case": {
+			"description": "> Headings: buttons, tabs, headings and menus in capitals (the normal look).\n\n- Everything: all text in capitals (typing boxes keep what you type)\n- Off: no capitals added anywhere",
+			"default": "Headings",
+			"values": {
+				"Headings": {},
+				"Everything": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/case-all.css"
+					}
+				},
+				"Off": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/case-off.css"
+					}
+				}
+			},
+			"section": "Text"
+		},
+		"Text glow": {
+			"description": "> The soft glow around text. On = headings, tabs and accents only (light). Everything = all text (heavier while scrolling).",
+			"default": "On",
+			"values": {
+				"On": {},
+				"Off": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/no-glow.css"
+					}
+				},
+				"Everything": {
+					"TargetCss": {
+						"affects": [
+							".*"
+						],
+						"src": "profiles/glow-all.css"
+					}
+				}
+			},
+			"section": "Text"
+		},
+		"Glow size": {
+			"description": "> How wide the glow around text is (when Text glow is On or Everything).",
+			"default": "4",
+			"slider": {
+				"min": 1,
+				"max": 12,
+				"step": 1,
+				"unit": "px",
+				"cssVariable": "--o2-glow"
+			},
+			"section": "Text"
+		},
+		"Blinking cursor": {
+			"description": "> A blinking block cursor after page titles. Stops blinking if Windows has reduced motion turned on.",
 			"default": "Off",
 			"values": {
 				"Off": {},
@@ -280,47 +488,59 @@
 						"affects": [
 							".*"
 						],
-						"src": "profiles/film.css"
+						"src": "profiles/cursor.css"
 					}
 				}
-			}
+			},
+			"section": "Text"
 		},
-		"Phosphor tint": {
-			"description": "> Strength of the colour film (only when Colour film is On).",
-			"default": "0",
-			"slider": {
-				"min": 0,
-				"max": 100,
-				"step": 5,
-				"unit": "%",
-				"cssVariable": "--o2-tint"
-			}
-		},
-		"Colour shift": {
-			"description": "> How far the colour film pulls every colour toward the phosphor colour (only when Colour film is On).",
-			"default": "0",
-			"slider": {
-				"min": 0,
-				"max": 100,
-				"step": 5,
-				"unit": "%",
-				"cssVariable": "--o2-hue"
-			}
-		},
-		"Colour mode": {
-			"description": "> Keep colours: Steam keeps its own colours with a phosphor tint over them.\n\n- Black and white: everything is turned grey first, so the screen is one colour like a real terminal.",
-			"default": "Keep colours",
+		"Menu style": {
+			"description": "> Terminal: right-click and top menus as black boxes with a phosphor frame and capitals. Steam: Steam's own menus (still recoloured).",
+			"default": "Terminal",
 			"values": {
-				"Keep colours": {},
-				"Black and white": {
+				"Terminal": {
 					"TargetCss": {
 						"affects": [
-							".*"
+							"Menu$|Supernav$"
 						],
-						"src": "profiles/mono.css"
+						"src": "menus.css"
+					}
+				},
+				"Steam": {}
+			},
+			"section": "Menus and sign-in"
+		},
+		"Menu cursor": {
+			"description": "> The \">\" next to the menu item under the mouse in right-click and top menus.",
+			"default": "On",
+			"values": {
+				"On": {},
+				"Off": {
+					"TargetCss": {
+						"affects": [
+							"Menu$|Supernav$"
+						],
+						"src": "profiles/menu-cursor-off.css"
 					}
 				}
-			}
+			},
+			"section": "Menus and sign-in"
+		},
+		"Sign-in screen": {
+			"description": "> Boot text: terminal start-up lines in the corner of the sign-in window and \"Who's playing?\".",
+			"default": "Plain",
+			"values": {
+				"Plain": {},
+				"Boot text": {
+					"TargetCss": {
+						"affects": [
+							"^Sign in to Steam"
+						],
+						"src": "profiles/signin-boot.css"
+					}
+				}
+			},
+			"section": "Menus and sign-in"
 		}
 	},
 	"o2Restyle": {

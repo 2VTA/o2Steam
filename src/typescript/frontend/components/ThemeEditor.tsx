@@ -376,7 +376,9 @@ export class RenderThemeEditor extends React.Component<ThemeEditorProps> {
 				const { tab } = patch;
 				const condition = { [name]: patch };
 
-				const existingTab = acc.find((p) => p.title === tab);
+				// o2steam: a condition without a tab belongs to the '' page. Comparing '' with undefined made a new
+				// page for every untabbed condition, so the settings showed only the first option.
+				const existingTab = acc.find((p) => p.title === (tab ?? ''));
 				if (existingTab) {
 					existingTab.conditions.push(condition);
 					return acc;

@@ -18,6 +18,8 @@
 	--o2-bg: #000000;
 	--o2-scan: 0.22;
 	--o2-glow: 4px;
+	--o2-vignette: 50%;
+	--o2-corner: 0px;
 	--o2-font: "Cascadia Mono", "Cascadia Code", Consolas, "Lucida Console", "Courier New", monospace;
 	--radius-sm: 0px;
 	--radius-md: 0px;
@@ -37,7 +39,7 @@ h2 {
 	text-shadow: 0 0 var(--o2-glow) currentColor;
 }
 
-/* scanlines + dark corners: a single static layer */
+/* TV corners + dark edges + scanlines: a single static layer. A corner layer with size 0 is not drawn. */
 html::after {
 	content: "";
 	position: fixed;
@@ -45,7 +47,11 @@ html::after {
 	z-index: 2147483647;
 	pointer-events: none;
 	background:
-		radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.5) 100%),
+		radial-gradient(circle at 100% 100%, transparent calc(var(--o2-corner) - 1px), #000 var(--o2-corner)) left top / var(--o2-corner) var(--o2-corner) no-repeat,
+		radial-gradient(circle at 0 100%, transparent calc(var(--o2-corner) - 1px), #000 var(--o2-corner)) right top / var(--o2-corner) var(--o2-corner) no-repeat,
+		radial-gradient(circle at 100% 0, transparent calc(var(--o2-corner) - 1px), #000 var(--o2-corner)) left bottom / var(--o2-corner) var(--o2-corner) no-repeat,
+		radial-gradient(circle at 0 0, transparent calc(var(--o2-corner) - 1px), #000 var(--o2-corner)) right bottom / var(--o2-corner) var(--o2-corner) no-repeat,
+		radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, var(--o2-vignette)) 100%),
 		repeating-linear-gradient(to bottom, rgba(0, 0, 0, var(--o2-scan)) 0, rgba(0, 0, 0, var(--o2-scan)) 1px, transparent 1px, transparent 3px);
 }
 

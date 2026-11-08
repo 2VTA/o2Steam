@@ -1,0 +1,4 @@
+/* o2 Retro Terminal - no upper-case text anywhere (the id in :is() only raises the priority) */
+:is(html, #o2-none) body *,
+:is(html, #o2-none) body *::before,
+:is(html, #o2-none) body *::after { text-transform: none !important; }

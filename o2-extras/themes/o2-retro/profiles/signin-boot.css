@@ -1,0 +1,17 @@
+/* o2 Retro Terminal - boot text in the bottom-left corner of the sign-in window (clicks go through) */
+body::before {
+	content: "O2STEAM TERMINAL BIOS v3.7\A MEMORY TEST ........ 640K OK\A CRT PHOSPHOR ........ OK\A SCANLINES ........... OK\A LOADING STEAM_";
+	position: fixed;
+	left: 22px;
+	bottom: 18px;
+	z-index: 2147483647;
+	pointer-events: none;
+	white-space: pre;
+	font-family: var(--o2-font);
+	font-size: 13px;
+	line-height: 1.45;
+	color: var(--o2-fg);
+	opacity: 0.85;
+	text-shadow: 0 0 4px currentColor;
+	text-transform: uppercase;
+}

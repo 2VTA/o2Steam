@@ -621,6 +621,128 @@ a:hover {
 	text-decoration: underline;
 }
 
+/* ================================================================ community pages: friends, groups, profile sub-pages
+   Steam paints a teal picture behind these pages (body.v6) and a highlight behind the name; both go, the
+   page gets the theme's own boxes. People's own profile backgrounds are left alone. */
+
+body.v6,
+body.profile_page,
+div.profile_page {
+	background-image: none !important;
+	background-color: var(--o2-black) !important;
+}
+
+.friends_header_bg {
+	background: none !important;
+	border-bottom: 1px solid var(--o2-dim);
+}
+
+.friends_header_name {
+	font-family: var(--o2-font) !important;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--o2-fg) !important;
+}
+
+.friends_nav .heading,
+.friends_nav > div:not(.hr) {
+	font-family: var(--o2-font) !important;
+	color: var(--o2-fg) !important;
+	letter-spacing: 0.1em;
+}
+
+.friends_nav a {
+	color: var(--o2-dim) !important;
+	border-left: 1px solid transparent;
+}
+
+.friends_nav a:hover {
+	background: var(--o2-panel) !important;
+	color: var(--o2-fg) !important;
+	border-left-color: var(--o2-fg);
+}
+
+.friends_nav > a.active,
+.friends_nav a.active {
+	background: var(--o2-fg) !important;
+	color: var(--o2-black) !important;
+}
+
+.friends_nav a.active * {
+	color: var(--o2-black) !important;
+}
+
+.friends_nav .hr {
+	border-bottom: 1px dashed var(--o2-faint) !important;
+}
+
+.profile_friends.title_bar,
+.profile_groups.title_bar,
+html.responsive .profile_friends.title_bar,
+html.responsive .profile_groups.title_bar {
+	background: var(--o2-panel) !important;
+	border: 1px solid var(--o2-dim) !important;
+	padding: 5px 10px !important;
+}
+
+.profile_friends.title_bar .title,
+.profile_groups.title_bar .title,
+.profile_friends.title,
+.profile_groups.title {
+	font-family: var(--o2-font) !important;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--o2-fg) !important;
+}
+
+.profile_friends.responsive_friendblocks,
+.profile_friends.search_results,
+.profile_groups.search_results {
+	background: transparent !important;
+}
+
+.friends_search_text_box,
+.groups_search_text_box {
+	background: var(--o2-black) !important;
+	background-image: none !important;
+	border: 1px solid var(--o2-dim) !important;
+	color: var(--o2-fg) !important;
+	padding-left: 8px !important;
+}
+
+.group_block,
+.invite_row,
+.manage_friends_panel {
+	background: var(--o2-panel) !important;
+	background-image: none !important;
+	border: 1px solid var(--o2-faint) !important;
+}
+
+.group_block:hover,
+.invite_row:hover {
+	border-color: var(--o2-fg) !important;
+}
+
+.group_block .linkTitle,
+.groupTitle a {
+	color: var(--o2-fg) !important;
+}
+
+.friend_block_v2:hover {
+	border-color: var(--o2-fg) !important;
+}
+
+.friend_block_v2 .indicator,
+.invite_row .indicator {
+	background: var(--o2-dim) !important;
+}
+
+.group_block_medium img,
+.friend_block_v2 img,
+.friends_header_avatar img {
+	border-radius: 0 !important;
+}
+
 /* ================================================================ sign in / "Who's playing?" */
 
 .LoginStaticBackground,

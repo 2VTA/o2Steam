@@ -1,0 +1,2 @@
+/* o2 Retro Terminal - all text in upper case, like an old terminal (typing boxes keep what you type) */
+:is(html, #o2-none) body *:not(input):not(textarea) { text-transform: uppercase !important; }

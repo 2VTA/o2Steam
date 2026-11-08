@@ -1,0 +1,12 @@
+/* o2 Retro Terminal - a blinking block cursor after page titles */
+h1::after,
+h2::after,
+.DialogHeader::after {
+	content: "\2588";
+	margin-left: 0.3em;
+	font-size: 0.8em;
+	color: var(--o2-fg);
+	animation: o2-cursor 1.1s steps(1, end) infinite;
+}
+@keyframes o2-cursor { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { h1::after, h2::after, .DialogHeader::after { animation: none; } }
