@@ -1,0 +1,8 @@
+{
+	"name": "o2-achievement-plus",
+	"common_name": "o2steam Achievement Plus",
+	"description": "A blue-and-gold ribbon for games you finished at 100%, shown on the game page and next to friends who finished it. Reads Steam's own achievement data inside the client, nothing is sent anywhere.",
+	"version": "0.1.0",
+	"useBackend": false,
+	"frontend": "frontend"
+}
