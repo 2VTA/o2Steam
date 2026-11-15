@@ -161,7 +161,7 @@ function me(): FriendInfo {
 	try {
 		// the signed-in user is in the UI friend store as `self` (the plain friend list leaves you out)
 		const self = friendStore.m_FriendsUIFriendStore?.self ?? friendStore.m_FriendsUIFriendStore?.GetPlayer?.(Number(BigInt(id) - STEAMID64_BASE));
-		const p = self?.persona;
+		const p = self?.persona ?? friendStore.m_mapPlayerCache?.get?.(Number(BigInt(id) - STEAMID64_BASE))?.m_persona;
 		return { id, name: String(p?.m_strPlayerName ?? 'You'), avatar: avatarUrl(p?.m_strAvatarHash ?? '') };
 	} catch {
 		return { id, name: 'You', avatar: '' };
@@ -270,6 +270,8 @@ function ensureStyle(doc: Document) {
 	(doc.head || doc.documentElement).appendChild(style);
 }
 
+const NO_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#2a3446"/><circle cx="32" cy="24" r="11" fill="#5d6b82"/><path d="M10 60c2-16 14-22 22-22s20 6 22 22z" fill="#5d6b82"/></svg>');
+
 function el(doc: Document, tag: string, props: Record<string, any> = {}, ...kids: (Node | string | null)[]): HTMLElement {
 	const e = doc.createElement(tag);
 	for (const [k, v] of Object.entries(props)) {
@@ -277,6 +279,13 @@ function el(doc: Document, tag: string, props: Record<string, any> = {}, ...kids
 		else if (k === 'class') e.className = v;
 		else if (k.startsWith('on')) (e as any)[k] = v;
 		else e.setAttribute(k, v);
+	}
+	if (tag === 'img') {
+		// a picture that is missing or fails to load shows a plain silhouette instead of a broken-image icon
+		if (!props.src) e.setAttribute('src', NO_AVATAR);
+		(e as HTMLImageElement).onerror = () => {
+			if (e.getAttribute('src') !== NO_AVATAR) e.setAttribute('src', NO_AVATAR);
+		};
 	}
 	for (const k of kids) if (k !== null) e.append(k as any);
 	return e;

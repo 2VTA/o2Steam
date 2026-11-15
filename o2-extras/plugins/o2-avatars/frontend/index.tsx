@@ -13,7 +13,7 @@
 
 declare const g_PopupManager: any;
 
-const REGISTRY_URL = 'https://raw.githubusercontent.com/2VTA/o2steam-registry/main/avatars.json';
+const REGISTRY_URL = 'https://raw.githubusercontent.com/2VTA/o2Steam/main/registry/avatars.json';
 const STORAGE_KEY = 'o2steam-avatars.v1';
 const STEAMID64_BASE = 76561197960265728n;
 const HASH_RE = /([0-9a-f]{40})(?:_(?:full|medium))?\.(?:jpe?g|png|gif)/i;
