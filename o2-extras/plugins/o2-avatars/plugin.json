@@ -2,7 +2,7 @@
 	"name": "o2-avatars",
 	"common_name": "o2steam Avatars",
 	"description": "Set a custom avatar (GIFs too) that every o2steam user sees on you.",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"useBackend": false,
 	"frontend": "frontend"
 }

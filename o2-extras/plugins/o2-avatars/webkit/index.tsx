@@ -55,6 +55,7 @@ function swap(img: HTMLImageElement, url: string) {
 	// the profile page wraps the avatar in <picture> with <source> tags that would win over our src
 	img.closest('picture')?.querySelectorAll('source').forEach((s) => s.remove());
 	img.removeAttribute('srcset');
+	img.style.objectFit = 'cover'; // a picture that isn't square is cropped, not squashed
 	img.src = url;
 }
 

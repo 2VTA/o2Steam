@@ -151,6 +151,7 @@ function swapImage(img: HTMLImageElement) {
 	const url = state.hashToUrl.get(m[1].toLowerCase());
 	if (url && img.src !== url) {
 		img.dataset.o2avOriginal ??= img.src;
+		img.style.objectFit = 'cover'; // a picture that isn't square is cropped, not squashed
 		img.src = url;
 	}
 }
@@ -161,7 +162,11 @@ function swapBackground(el: HTMLElement) {
 	const m = HASH_RE.exec(bg);
 	if (!m) return;
 	const url = state.hashToUrl.get(m[1].toLowerCase());
-	if (url) el.style.backgroundImage = `url("${url}")`;
+	if (url) {
+		el.style.backgroundImage = `url("${url}")`;
+		el.style.backgroundSize = 'cover';
+		el.style.backgroundPosition = 'center';
+	}
 }
 
 function scan(root: ParentNode) {
