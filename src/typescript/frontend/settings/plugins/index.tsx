@@ -143,6 +143,14 @@ class PluginViewModal extends Component<{}, PluginViewModalState> {
 		const originalChecked = plugin.enabled;
 		const updated = !this.state.checkedItems[index] || plugin.data.name === 'core';
 
+		/** o2steam: switching a running plugin OFF takes effect right away - no Save button, no confirmation.
+		 *  (Turning one on still waits for Save, so several can be switched on together.) */
+		if (!updated && originalChecked && plugin.data.name !== 'core') {
+			this.setState({ checkedItems: { ...this.state.checkedItems, [index]: false } });
+			backend.plugins.togglePlugin(JSON.stringify([{ plugin_name: plugin.data.name, enabled: false }]));
+			return;
+		}
+
 		const checkedItems = { ...this.state.checkedItems, [index]: updated };
 		const filtered = this.state.updatedPlugins.filter((p) => p.plugin_name !== plugin.data.name);
 		const updatedPlugins = updated !== originalChecked ? [...filtered, { plugin_name: plugin.data.name, enabled: updated }] : filtered;
