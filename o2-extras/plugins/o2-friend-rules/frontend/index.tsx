@@ -63,6 +63,8 @@ interface LogEntry {
 
 interface Saved {
 	enabled: boolean;
+	lock: boolean; // "Invite locked": every incoming friend request is cancelled at once, no rules involved
+	lockAction: 'ignore' | 'block';
 	rules: Rule[];
 	pending: Record<string, number>; // accountid -> when we first saw this request
 	history: Record<string, number[]>; // accountid -> when requests from them arrived
@@ -103,7 +105,7 @@ const DEFAULT_RULES: Rule[] = [
 ];
 
 const state = {
-	saved: { enabled: false, rules: DEFAULT_RULES, pending: {}, history: {}, log: [] } as Saved,
+	saved: { enabled: false, lock: false, lockAction: 'ignore', rules: DEFAULT_RULES, pending: {}, history: {}, log: [] } as Saved,
 	handled: new Set<number>(), // requests already decided in this Steam session
 	busy: false,
 	preview: null as null | { name: string; result: string }[],
@@ -120,6 +122,8 @@ function loadSaved() {
 			const parsed = JSON.parse(raw);
 			state.saved = {
 				enabled: !!parsed.enabled,
+				lock: !!parsed.lock,
+				lockAction: parsed.lockAction === 'block' ? 'block' : 'ignore',
 				rules: Array.isArray(parsed.rules) ? parsed.rules.filter((r: any) => CONDITIONS.some((c) => c.id === r?.cond) && ACTIONS.some((a) => a.id === r?.action)) : DEFAULT_RULES,
 				pending: parsed.pending && typeof parsed.pending === 'object' ? parsed.pending : {},
 				history: parsed.history && typeof parsed.history === 'object' ? parsed.history : {},
@@ -440,6 +444,7 @@ async function decide(p: Person): Promise<Rule | null> {
 
 async function act(p: Person, action: ActionId): Promise<string> {
 	if (action === 'none') return 'left as is';
+	if (state.saved.lock && action === 'accept') return 'not accepted: Invite locked is on';
 	if (!incomingIds().includes(p.accountid)) return 'request already gone';
 	const fs = friendStore();
 	const player = p.player();
@@ -458,6 +463,34 @@ function addLog(entry: LogEntry) {
 	state.saved.log = [entry, ...state.saved.log].slice(0, 60);
 	persist();
 	notify();
+}
+
+// "Invite locked": runs every second and only looks at Steam's own list of waiting requests (no network),
+// so a request is cancelled within about a second of arriving. It doesn't depend on the rules or on the
+// "Automatically process" switch.
+const lockTried = new Map<number, number>(); // accountid -> attempts for the request that is waiting now
+let lockBusy = false;
+async function lockTick() {
+	if (!state.saved.lock || lockBusy) return;
+	const ids = incomingIds();
+	for (const k of [...lockTried.keys()]) if (!ids.includes(k)) lockTried.delete(k); // request is gone: forget it
+	const todo = ids.filter((id) => (lockTried.get(id) ?? 0) < 3); // a request that Steam won't let us cancel is tried 3 times, not forever
+	if (!todo.length) return;
+	lockBusy = true;
+	try {
+		for (const id of todo) {
+			if (!state.saved.lock) break;
+			lockTried.set(id, (lockTried.get(id) ?? 0) + 1);
+			state.handled.add(id); // the rules have nothing left to decide for this one
+			const p = new Person(id);
+			const name = p.name();
+			const action = state.saved.lockAction;
+			const result = await act(p, action);
+			addLog({ t: Date.now(), name, accountid: id, rule: 'Invite locked', action, result });
+		}
+	} finally {
+		lockBusy = false;
+	}
 }
 
 /** keeps track of when requests arrived (for "repeated") and handles new ones */
@@ -486,7 +519,8 @@ async function tick() {
 	}
 	if (changed) persist();
 
-	if (!state.saved.enabled || state.busy) return;
+	// Invite locked beats the rules: while it is on, the rules never touch a request (lockTick cancels it)
+	if (!state.saved.enabled || state.busy || state.saved.lock) return;
 	const todo = ids.filter((id) => !state.handled.has(id));
 	if (!todo.length) return;
 	state.busy = true;
@@ -572,6 +606,18 @@ function Panel() {
 		setNewValue('');
 		setMessage('');
 	};
+	const setLock = (on: boolean) => {
+		state.saved.lock = on;
+		lockTried.clear();
+		persist();
+		force();
+		if (on) void lockTick();
+	};
+	const setLockAction = (a: 'ignore' | 'block') => {
+		state.saved.lockAction = a;
+		persist();
+		force();
+	};
 	const setEnabled = (on: boolean) => {
 		state.saved.enabled = on;
 		state.handled.clear();
@@ -586,6 +632,24 @@ function Panel() {
 	return h(
 		PanelSection,
 		{ title: 'o2steam Friend Rules' },
+		h(Field, { label: 'Invite locked', description: 'On = nobody can add you: every friend request is cancelled right away (within about a second), whatever the rules below say.' }, h(Toggle, { value: state.saved.lock, onChange: setLock })),
+		state.saved.lock
+			? h(
+					PanelSectionRow,
+					null,
+					h(
+						'div',
+						{ style: { display: 'flex', gap: 8, alignItems: 'center' } },
+						h('span', { style: css.muted }, 'Cancel with:'),
+						h(
+							'select',
+							{ style: css.input, value: state.saved.lockAction, onChange: (e: any) => setLockAction(e.target.value === 'block' ? 'block' : 'ignore') },
+							h('option', { value: 'ignore' }, 'Ignore (decline the request)'),
+							h('option', { value: 'block' }, 'Block (they cannot try again)'),
+						),
+					),
+			  )
+			: null,
 		h(Field, { label: 'Automatically process friend requests', description: 'Off = nothing happens to your requests.' }, h(Toggle, { value: state.saved.enabled, onChange: setEnabled })),
 		h(
 			PanelSectionRow,
@@ -687,6 +751,8 @@ export default async function PluginMain() {
 	loadPrices();
 	setInterval(() => void tick(), POLL_MS);
 	setTimeout(() => void tick(), 4000);
+	setInterval(() => void lockTick(), 1000);
+	setTimeout(() => void lockTick(), 1500);
 
 	return {
 		title: 'o2steam Friend Rules',
