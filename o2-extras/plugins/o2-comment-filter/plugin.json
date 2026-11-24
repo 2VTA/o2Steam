@@ -2,7 +2,7 @@
 	"name": "o2-comment-filter",
 	"common_name": "o2steam Comment Filter",
 	"description": "Deletes comments on your profile that contain words you choose (or asks you first). Works on your profile page in Steam.",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"useBackend": false,
 	"frontend": "frontend"
 }

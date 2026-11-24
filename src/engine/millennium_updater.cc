@@ -205,9 +205,13 @@ std::optional<nlohmann::json> millennium_updater::find_asset(const nlohmann::jso
     return std::nullopt;
 #endif
 
-    std::string target_name = "millennium-" + release_info.value("tag_name", "") + "-" + platform_suffix;
-    for (auto& asset : release_info["assets"]) {
-        if (asset.value("name", "") == target_name) return asset;
+    // the o2steam name first; the old "millennium-" name is still looked for (older releases and the legacy copy)
+    const std::string tag = release_info.value("tag_name", "");
+    const std::string names[] = { "o2steam-" + tag + "-" + platform_suffix, "millennium-" + tag + "-" + platform_suffix };
+    for (const auto& target_name : names) {
+        for (auto& asset : release_info["assets"]) {
+            if (asset.value("name", "") == target_name) return asset;
+        }
     }
     return std::nullopt;
 }

@@ -42,6 +42,7 @@ const state = {
 	saved: { words: [], whole: true, auto: false, pending: true, log: [] } as Saved,
 	busy: false,
 	lastCount: -1,
+	retryAfter: 0,
 };
 
 // ---------------------------------------------------------------- storage
@@ -289,6 +290,7 @@ async function deleteMatches(setStatus: (t: string, bad?: boolean) => void): Pro
 			c.link!.click(); // Steam's own delete link
 			const gone = await waitFor(() => !el.isConnected || !document.getElementById(id) || !!document.getElementById(id)?.querySelector('.commentthread_comment_deleted, [class*="deleted"]'), 9000);
 			if (!gone) {
+				state.retryAfter = Date.now() + 60000; // automatic mode waits a minute before trying again
 				setStatus('Steam did not answer to the delete - stopped. Try again in a moment.', true);
 				break;
 			}
@@ -504,7 +506,7 @@ function mountPanel(): HTMLElement | null {
 }
 
 async function autoRun() {
-	if (!state.saved.auto || state.busy) return;
+	if (!state.saved.auto || state.busy || Date.now() < state.retryAfter) return;
 	if (!matches().length) return;
 	const panel = document.getElementById(PANEL_ID);
 	const done = await deleteMatches(() => {});

@@ -50,7 +50,7 @@ foreach ($plugin in Get-ChildItem (Join-Path $Extras "plugins") -Directory) {
 }
 
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
-$zipPath = Join-Path $Out "millennium-$version-windows-x86_64.zip"
+$zipPath = Join-Path $Out "o2steam-$version-windows-x86_64.zip"
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 $zip = [System.IO.Compression.ZipFile]::Open($zipPath, [System.IO.Compression.ZipArchiveMode]::Create)
 try {
@@ -63,3 +63,9 @@ try {
 
 $item = Get-Item $zipPath
 "{0}  {1:N1} MB  {2} files" -f $item.Name, ($item.Length / 1MB), $entries.Count
+
+# the o2steam name is the main one; the "millennium-" copy is kept for installs that only look for the old name
+$legacy = Join-Path $Out "millennium-$version-windows-x86_64.zip"
+if (Test-Path $legacy) { Remove-Item $legacy -Force }
+Copy-Item $zipPath $legacy
+"{0}  (legacy name, same file)" -f (Split-Path $legacy -Leaf)
