@@ -223,6 +223,46 @@ function ribbonSvg(size: number, uid: string): string {
 	);
 }
 
+/**
+ * Steam's own 'completed' award, copied from Steam's UI code (steamui/sp.js + css/sp.css): the blue rosette on its
+ * ribbon tails, wrapped in Steam's own CSS classes so Steam's own twinkling sparkles play around it. The class
+ * names are Steam's (they only exist while this Steam build has them; without them the icon still shows).
+ */
+const AWARD_STACK = '_2EZqJBCxzsAuIxcN4FeHLr';
+const AWARD = '_2c-xpzS0W1WUVgT3vTqNDB';
+const AWARD_SPARKLES = '_2-RSM47O-vDauDjiXL-VUs';
+const AWARD_SPARKLE = '_2b8w48iw2Ki6ikrG9Ezbbv';
+// [x%, y%, delay, size px] - the four sparkle spots Steam uses
+const SPARKLES = [[35, 20, 0, 12], [80, 60, 0.3, 9], [55, 85, 0.55, 11], [95, 15, 0.8, 8]];
+
+function completedSvg(uid: string): string {
+	return (
+		`<svg viewBox="0 0 16 24" fill="none" xmlns="http://www.w3.org/2000/svg">` +
+		`<defs><linearGradient id="cg${uid}" x1="7.8579" y1="14.3641" x2="7.8579" y2="25.1901" gradientUnits="userSpaceOnUse"><stop offset="0.168269" stop-color="#1A9FFF"/><stop offset="1" stop-color="#1465CF"/></linearGradient></defs>` +
+		`<path d="M13.48 23.2439V23.8926H2.23582V23.2439H13.48ZM12.637 22.3516H3.07869V23.2439H12.637V22.3516ZM9.24241 21.1553H11.0107L13.0475 16.1082H11.3176L9.24241 17.4056L9.24348 21.1553L9.24241 21.1553Z" fill="url(#cg${uid})" fill-rule="evenodd" clip-rule="evenodd"/>` +
+		`<path d="M6.47385 21.1553H4.70556L2.66825 16.1082H4.80856L6.47385 17.4056V21.1553Z" fill="url(#cg${uid})"/>` +
+		`<path d="M10.0846 2.33648H13.3393V5.59121L15.5688 7.89135L13.3393 10.1915V13.4462H10.0846L7.78442 15.6758L5.48428 13.4462H2.22955V10.1915L0 7.89135L2.22955 5.59121V2.33648H5.48428L7.78442 0.106934L10.0846 2.33648ZM9.06155 4.80929C8.45205 4.55683 7.78095 4.49061 7.1339 4.61924C6.48675 4.74797 5.89221 5.066 5.42563 5.53257C4.95906 5.99914 4.64104 6.59368 4.51231 7.24084C4.38367 7.88789 4.4499 8.55898 4.70236 9.16848C4.95484 9.77777 5.38229 10.2985 5.93062 10.665C6.47925 11.0316 7.12458 11.2275 7.78442 11.2275C8.2228 11.2285 8.65743 11.1429 9.06263 10.9756C9.46772 10.8083 9.83546 10.5622 10.1454 10.2523C10.4553 9.94239 10.7013 9.57465 10.8686 9.16957C11.036 8.76436 11.1216 8.32974 11.1206 7.89135C11.1206 7.23152 10.9246 6.58619 10.558 6.03756C10.1916 5.48922 9.67084 5.06177 9.06155 4.80929Z" fill="#1A9FFF" fill-rule="evenodd" clip-rule="evenodd"/>` +
+		`</svg>`
+	);
+}
+
+function trophy(doc: Document, size: number, tip: string): HTMLElement {
+	const el = doc.createElement('span');
+	el.className = 'o2ap-badge';
+	el.title = tip;
+	el.style.cssText = 'filter:none;margin-right:12px';
+	const sparkles = SPARKLES.map(
+		([x, y, d, sz]) =>
+			`<svg class="${AWARD_SPARKLE}" width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="currentColor" style="--sparkle-x:${x}%;--sparkle-y:${y}%;--sparkle-delay:${d};--sparkle-size:${sz}px"><path d="M0.587033 11.2579L5.19606 9.85212C7.18647 9.24314 8.76501 7.75052 9.43443 5.83676L11.3101 0.476669C11.3336 0.404102 11.3734 0.344339 11.419 0.283155C11.4425 0.254698 11.4646 0.227663 11.494 0.199205C11.5632 0.138022 11.6426 0.0825266 11.7338 0.0498009C11.7617 0.0384177 11.797 0.0270346 11.8309 0.0227661C11.8824 0.0056914 11.9397 0 11.9971 0C12.0545 0 12.1118 0.0056914 12.1633 0.0227661C12.1972 0.0284577 12.2325 0.0398408 12.2604 0.0498009C12.3634 0.0882182 12.4488 0.143714 12.5179 0.214857C12.5517 0.241892 12.5752 0.27604 12.5988 0.308769C12.6326 0.35857 12.6621 0.414065 12.6841 0.473825L14.5598 5.83391C15.235 7.74771 16.8076 9.24187 18.8025 9.84928L23.4116 11.2551C23.7602 11.3604 24 11.6748 24 12.0291C24 12.3663 23.7823 12.6709 23.4571 12.7932L18.4185 14.6629C16.6458 15.3217 15.2557 16.6934 14.6098 18.4236L12.6944 23.529C12.6782 23.5717 12.6444 23.603 12.6209 23.6414C12.6061 23.6656 12.5929 23.6884 12.5752 23.7112C12.5458 23.7496 12.5164 23.7837 12.4781 23.815C12.4193 23.8677 12.3516 23.9132 12.2766 23.9445C12.231 23.9616 12.1854 23.9787 12.1398 23.9829L11.9912 24C11.9456 24 11.9 23.9943 11.8544 23.9829C11.8088 23.9772 11.7632 23.9602 11.7176 23.9445C11.6455 23.9132 11.5808 23.8691 11.5219 23.8179C11.4837 23.7851 11.4528 23.751 11.4219 23.7112C11.4013 23.6855 11.3866 23.6571 11.3704 23.6286C11.3498 23.5945 11.3204 23.5674 11.3071 23.529L9.39176 18.4236C8.74005 16.6919 7.34989 15.3204 5.57709 14.6629L0.53844 12.7932C0.211861 12.6709 6.89772e-06 12.3664 6.89772e-06 12.0291C-0.00146421 11.6777 0.232497 11.3618 0.587033 11.2579Z"/></svg>`,
+	).join('');
+	el.innerHTML =
+		`<span class="${AWARD_STACK}" style="--award-base:${size}px">` +
+		`<span class="${AWARD}" style="--shine-index:0">${completedSvg(String(++uidCounter))}</span>` +
+		`<div class="${AWARD_SPARKLES}" aria-hidden="true">${sparkles}</div>` +
+		`</span>`;
+	return el;
+}
+
 let uidCounter = 0;
 function ribbon(doc: Document, size: number, tip: string): HTMLElement {
 	const el = doc.createElement('span');
@@ -727,7 +767,7 @@ async function renderFeedCards(doc: Document, appid: string) {
 				doc,
 				'div',
 				{ class: 'o2ap-feed' },
-				ribbon(doc, 56, '100%'),
+				trophy(doc, 56, '100%'),
 				el(
 					doc,
 					'div',

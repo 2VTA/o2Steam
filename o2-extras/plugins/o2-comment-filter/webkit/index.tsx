@@ -24,6 +24,8 @@ const MAX_WORDS = 5000;
 interface LogEntry {
 	t: number;
 	author: string;
+	sid?: string; // the author's SteamID64, saved even when the profile has a custom url
+	url?: string; // the author's profile (entries from before this existed have none)
 	word: string;
 	text: string;
 }
@@ -176,6 +178,8 @@ interface Comment {
 	id: string;
 	text: string;
 	author: string;
+	authorUrl: string; // the author's profile page ('' if it can't be worked out)
+	sid: string; // the author's SteamID64 ('' if unknown)
 	link: HTMLAnchorElement | null; // Steam's own delete link (only the profile owner has it)
 	own: boolean;
 	pending: boolean; // Steam shows "awaiting analysis" instead of the text
@@ -201,9 +205,14 @@ function readComments(): Comment[] {
 		const link =
 			Array.from(el.querySelectorAll<HTMLAnchorElement>('a')).find((a) => /DeleteComment\s*\(/.test(a.getAttribute('href') || '')) ?? null;
 		const mini = Number((el.querySelector('[data-miniprofile]') as HTMLElement | null)?.dataset.miniprofile || 0);
+		const href = (el.querySelector('.commentthread_author_link') as HTMLAnchorElement | null)?.href || '';
+		let authorUrl = /^https:\/\/steamcommunity\.com\//i.test(href) ? href : '';
+		if (!authorUrl && mini) authorUrl = 'https://steamcommunity.com/profiles/' + String(BigInt(mini) + STEAMID64_BASE);
 		return {
 			el,
 			id: el.id,
+			authorUrl,
+			sid: mini ? String(BigInt(mini) + STEAMID64_BASE) : '',
 			text: (el.querySelector('.commentthread_comment_text')?.textContent || '').trim(),
 			pending: PENDING_RE.test(el.querySelector('.commentthread_comment_text')?.textContent || ''),
 			author: (el.querySelector('.commentthread_author_link')?.textContent || '').trim(),
@@ -284,7 +293,7 @@ async function deleteMatches(setStatus: (t: string, bad?: boolean) => void): Pro
 				break;
 			}
 			done++;
-			state.saved.log = [{ t: Date.now(), author: c.author || '?', word, text: c.pending ? PENDING_NOTE : c.text.slice(0, 80) }, ...state.saved.log].slice(0, MAX_LOG);
+			state.saved.log = [{ t: Date.now(), author: c.author || '?', url: c.authorUrl || undefined, sid: c.sid || undefined, word, text: c.pending ? PENDING_NOTE : c.text.slice(0, 80) }, ...state.saved.log].slice(0, MAX_LOG);
 			persist();
 			await sleep(200); // a short pause between two deletes
 		}
@@ -298,6 +307,50 @@ async function deleteMatches(setStatus: (t: string, bad?: boolean) => void): Pro
 
 const STYLE =
 	'margin:0 0 16px;padding:12px 14px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.18);color:#c6d4df;font-size:13px;line-height:1.5';
+
+let resolveDiag = '';
+
+/** log lines saved before profile links existed: find the person in your own friends list by name and fill the link in */
+async function resolveOldLines(): Promise<void> {
+	const missing = state.saved.log.filter((l) => !l.url && l.author && l.author !== '?');
+	if (!missing.length) return;
+	resolveDiag = '';
+	try {
+		const res = await fetch('https://steamcommunity.com/my/friends/', { credentials: 'include' });
+		if (!res.ok) { resolveDiag = 'friends page: HTTP ' + res.status; return; }
+		const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+		const friends: { id: string; names: string[] }[] = [];
+		doc.querySelectorAll<HTMLElement>('[data-steamid]').forEach((b) => {
+			if (!b.classList.contains('friend_block_v2') && !b.querySelector('.friend_block_content')) return;
+			const c = (b.querySelector('.friend_block_content') || b).cloneNode(true) as HTMLElement;
+			c.querySelectorAll('.friend_small_text, .linkStyle').forEach((e) => e.remove());
+			const full = (c.textContent || '').replace(/\s+/g, ' ').trim();
+			const names = new Set<string>([norm(full)]);
+			const m = full.match(/^(.*?)\s*\((.*)\)\s*$/); // "nickname (real name)"
+			if (m) { names.add(norm(m[1])); names.add(norm(m[2])); }
+			friends.push({ id: b.dataset.steamid || '', names: [...names].filter(Boolean) });
+		});
+		resolveDiag = friends.length + ' friends read';
+		const clean = (t: string) => norm(t).replace(/[‘’ʼ`´]/g, "'");
+		let changed = false;
+		for (const l of missing) {
+			const parts = new Set<string>([clean(l.author)]);
+			const m = l.author.match(/^(.*?)\s*\((.*)\)\s*$/);
+			if (m) { parts.add(clean(m[1])); parts.add(clean(m[2])); }
+			const wanted = [...parts].filter(Boolean);
+			let hit = friends.filter((f) => f.names.some((n) => wanted.includes(clean(n))));
+			// a looser try: the friend's name contains the nickname or the real name (3+ letters)
+			if (!hit.length) hit = friends.filter((f) => f.names.some((n) => wanted.some((w) => w.length >= 3 && clean(n).includes(w))));
+			if (hit.length === 1 && /^\d{17}$/.test(hit[0].id)) {
+				l.url = 'https://steamcommunity.com/profiles/' + hit[0].id;
+				changed = true;
+			} else resolveDiag += hit.length > 1 ? ', ' + hit.length + ' friends match that name' : ', none matches that name';
+		}
+		if (changed) persist();
+	} catch (e) {
+		resolveDiag = 'error: ' + String((e as any)?.message || e);
+	}
+}
 
 function render(panel: HTMLElement, message = '', bad = false) {
 	const s = state.saved;
@@ -407,7 +460,32 @@ function render(panel: HTMLElement, message = '', bad = false) {
 
 	if (s.log.length) {
 		const log = h('div', { style: 'margin-top:10px;font-size:12px;opacity:0.8' }, h('div', { style: 'font-weight:600' }, 'Deleted by the filter'));
-		for (const l of s.log) log.append(h('div', {}, `${new Date(l.t).toLocaleString()} - ${l.author}: "${l.text}" (${l.word})`));
+		for (const l of s.log) {
+			// the name is a link to that person's profile (only our own steamcommunity.com links are accepted)
+			const who = l.url && /^https:\/\/steamcommunity\.com\//i.test(l.url)
+				? h('a', { href: l.url, style: 'color:inherit;text-decoration:underline;cursor:pointer', title: 'Open this profile' }, l.author)
+				: l.author && l.author !== '?'
+					// older lines have no saved profile link: the name opens Steam's people search instead
+					? h('a', {
+							href: '#',
+							style: 'color:inherit;text-decoration:underline;cursor:pointer',
+							title: 'Open this profile (looked up in your friends list)',
+							onclick: (ev: Event) => {
+								ev.preventDefault();
+								setStatus('Looking for ' + l.author + ' in your friends list...');
+								void resolveOldLines().then(() => {
+									if (l.url) location.href = l.url;
+									else setStatus('Could not find "' + l.author + '" in your friends list, and this line was saved without a profile link (' + (resolveDiag || 'no details') + ').', true);
+								});
+							},
+						}, l.author)
+					: h('span', {}, l.author);
+			const sid = l.sid || (l.url || '').match(/\/profiles\/(\d{17})/)?.[1] || '';
+			const idTag = sid
+				? h('span', { style: 'user-select:text;opacity:0.75' }, ' [Steam ID ' + sid + ']')
+				: h('span', { style: 'opacity:0.5' }, ' [no Steam ID saved: deleted before this was added]');
+			log.append(h('div', {}, `${new Date(l.t).toLocaleString()} - `, who, idTag, `: "${l.text}" (${l.word})`));
+		}
 		panel.append(log);
 	}
 }
